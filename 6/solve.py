@@ -6,28 +6,36 @@ from functools import reduce
 
 f = open("input.txt")
 
-contents = f.readlines()
+# contents = f.readlines()
 
-f.close()
+# f.close()
 
-print(contents)
-# temp, just to keep stuff simpler
-contents = contents[0:2]
-# contents = [[lineIndex] for lineIndex in range(0, 3)]
-# contents = [list(lineIndex) for lineIndex in range(0, len(contents))]
-# contents = [[lineIndex].append(contents[lineIndex]) for lineIndex in range(0, len(contents))]
+# print(contents)
+# # temp, just to keep stuff simpler
+# contents = contents[0:2]
+# # contents = [[lineIndex] for lineIndex in range(0, 3)]
+# # contents = [list(lineIndex) for lineIndex in range(0, len(contents))]
+# # contents = [[lineIndex].append(contents[lineIndex]) for lineIndex in range(0, len(contents))]
 
-# print('new contents: ', contents)
-# sys.exit(1)
+# # print('new contents: ', contents)
+# # sys.exit(1)
 
-# map in py3 returns an iterable!
+# # map in py3 returns an iterable!
 
-# contents = [[lineIndex, contents[lineIndex]] for lineIndex in range(0, len(contents))]
-# print('with line indexes: ', contents)
+# # contents = [[lineIndex, contents[lineIndex]] for lineIndex in range(0, len(contents))]
+# # print('with line indexes: ', contents)
 
-# the inner map converts the list of coordinates from string pairs to int pairs
-# coords = list(map(lambda line: list(map(int, line.rstrip().replace(' ', '').split(','))), contents))
-coords = list(map(lambda lineIndex: list(map(int, contents[lineIndex].rstrip().replace(' ', '').split(','))), range(0, len(contents))))
+# # the inner map converts the list of coordinates from string pairs to int pairs
+# # coords = list(map(lambda line: list(map(int, line.rstrip().replace(' ', '').split(','))), contents))
+# coords = list(map(lambda lineIndex: list(map(int, contents[lineIndex].rstrip().replace(' ', '').split(','))), range(0, len(contents))))
+
+coords = []
+
+lineIndex = 0
+for line in f.readlines():
+	coordsAsList = list(map(int, line.rstrip().replace(' ', '').split(',')))
+	coords.append(coordsAsList)
+	lineIndex += 1
 
 print('coords: ', coords)
 # print("it is", [item for item in coords])
