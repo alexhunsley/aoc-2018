@@ -4,6 +4,10 @@ import sys
 from operator import methodcaller
 from functools import reduce
 from collections import Counter, defaultdict
+from tqdm import tqdm
+
+# part 2
+safeRegionMaxDistance = 10000
 
 coords = []
 
@@ -24,15 +28,23 @@ maxY = reduce(max, [item[1] for item in coords])
 print
 print
 
-border = 1
+
+# border = 1
+
+#for part 2 use this:
+border = 10000
 
 closestTargetToCoordDict = defaultdict(set)
 
+safeSquareCount = 0
 
 # for y in range(4, 5):
-for y in range(minY - border, maxY + 1 + border):
+for y in tqdm(range(minY - border, maxY + 1 + border)):
 	for x in range(minX - border, maxX + 1 + border):
 		dists = [(abs(x - targetX) + abs(y - targetY)) for (targetX, targetY) in coords]
+
+		if sum(dists) < safeRegionMaxDistance:
+			safeSquareCount += 1
 
 		distancesCounter = Counter(dists)
 		minDist = min(distancesCounter)
@@ -46,20 +58,20 @@ for y in range(minY - border, maxY + 1 + border):
 		if (uniqueDistancesSorted[0] == 0):
 			# don't forget to add a closest count for the actual square containing a target
 			closestTargetToCoordDict[indexOfClosestCoord].add((x, y))
-			print(chr(ord('A') + indexOfClosestCoord), end='')
+			# print(chr(ord('A') + indexOfClosestCoord), end='')
 			continue
 
 		# any duplicate distances at all, and we consider there is no 'closest'
 		#. --- nope, stupid question wording. It's dupes of only the closest distance that causes '.' to appear!
 		if distancesCounter[minDist] > 1:
-			print('.', end='')
+			# print('.', end='')
 			continue
 
 		indexOfClosestCoord = dists.index(uniqueDistancesSorted[0])
 
 		closestTargetToCoordDict[indexOfClosestCoord].add((x, y))
-		print(indexOfClosestCoord, end='')
-	print('')
+		# print(indexOfClosestCoord, end='')
+	# print('')
 
 
 sortedTargetDict = sorted(closestTargetToCoordDict, key=lambda x:len(closestTargetToCoordDict[x]), reverse=True)
@@ -80,5 +92,5 @@ targetIndexesWithInfiniteArea = list(map(lambda targetCoord: coords.index(target
 sortedTargetAreasWithoutInfiniteAreas = [x for x in sortedTargetDict if x not in targetIndexesWithInfiniteArea]
 
 # print('sorted areas, minus infinte: ', sortedTargetAreasWithoutInfiniteAreas)
-print(' area of largest region: ', len(closestTargetToCoordDict[ sortedTargetAreasWithoutInfiniteAreas[0] ]))
-
+print(' Part 1: area of largest region: ', len(closestTargetToCoordDict[ sortedTargetAreasWithoutInfiniteAreas[0] ]))
+print(' Part 2: safe square count: ', safeSquareCount)
