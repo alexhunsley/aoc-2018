@@ -31,6 +31,12 @@ maxX = reduce(max, [item[0] for item in coords])
 minY = reduce(min, [item[1] for item in coords])
 maxY = reduce(max, [item[1] for item in coords])
 
+sampleXLeft = minX - safeRegionMaxDistance
+sampleXRight = maxX + safeRegionMaxDistance
+
+startYScan = minY - safeRegionMaxDistance
+endYScan = maxY + safeRegionMaxDistance
+
 print
 print
 
@@ -44,7 +50,6 @@ closestTargetToCoordDict = defaultdict(set)
 
 safeSquareCount = 0
 
-# for y in range(4, 5):
 for y in tqdm(range(minY - border, maxY + 1 + border)):
 	for x in range(minX - border, maxX + 1 + border):
 		dists = [(abs(x - targetX) + abs(y - targetY)) for (targetX, targetY) in coords]
