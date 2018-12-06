@@ -4,7 +4,8 @@ import sys
 from operator import methodcaller
 from functools import reduce
 from collections import Counter, defaultdict
-f = open("input.txt")
+
+
 
 # contents = f.readlines()
 
@@ -32,6 +33,9 @@ f = open("input.txt")
 coords = []
 
 lineIndex = 0
+
+f = open("input.txt")
+
 for line in f.readlines():
 	coordsAsList = list(map(int, line.rstrip().replace(' ', '').split(',')))
 	coords.append(coordsAsList)
@@ -41,16 +45,18 @@ for line in f.readlines():
 # coords = [(10,10), (11, 14), (12,12)]
 # coords = [(10,10), (19, 18), (12,11)]
 
-coords = [
-	[1, 1],
-	[1, 6],
-	[8, 3],
-	[3, 4],
-	[5, 5],
-	[8, 9]
-]
+# coords = [
+# 	[1, 1],
+# 	[1, 6],
+# 	[8, 3],
+# 	[3, 4],
+# 	[5, 5],
+# 	[8, 9]
+# ]
 
 print('coords: ', coords)
+# sys.exit(1)
+
 # print("it is", [item for item in coords])
 
 minX = reduce(min, [item[0] for item in coords])
