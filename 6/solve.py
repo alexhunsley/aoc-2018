@@ -40,7 +40,7 @@ for line in f.readlines():
 
 # coords = coords[0:2]
 # coords = [(10,10), (11, 14), (12,12)]
-# coords = [(10,10), (19, 18), (12,12)]
+# coords = [(10,10), (19, 18), (12,11)]
 
 coords = [
 	[1, 1],
@@ -66,6 +66,7 @@ print
 
 border = 1
 
+# for y in range(4, 5):
 for y in range(minY - border, maxY + 1 + border):
 	for x in range(minX - border, maxX + 1 + border):
 		# pass
@@ -76,25 +77,34 @@ for y in range(minY - border, maxY + 1 + border):
 		# print(' dists =', dists)
 
 		distancesCounter = Counter(dists)
+		minDist = min(distancesCounter)
+		# minDist = min(distancesCounter, key=distancesCounter.get)
+		# print('minDist=',minDist)
 
-		# take away any distances that appear more than once
-		# (either works!)
-		uniqueDistances = [dist for dist in distancesCounter if distancesCounter[dist] == 1]
-		# uniqueDistances = list(filter(lambda x: distancesCounter[x] == 1, distancesCounter))
+		duplicateDistances = [dist for dist in distancesCounter if distancesCounter[dist] > 1]
+		# uniqueDistancesSorted = [dist for dist in distancesCounter if distancesCounter[dist] == 1]
+		uniqueDistancesSorted = [dist for dist in distancesCounter if distancesCounter[dist] == 1]
+		uniqueDistancesSorted.sort()
 
-		uniqueDistances.sort()
+		assert uniqueDistancesSorted
 
-		# print('uniqueDistances = ', uniqueDistances)
-		assert uniqueDistances
-
-		indexOfClosestCoord = dists.index(uniqueDistances[0])
-		# print('closest coord index= ', indexOfClosestCoord, ' from this array: ', dists)
-
-		if (uniqueDistances[0] == 0):
-			# print('*', end='')
+		if (uniqueDistancesSorted[0] == 0):
 			print(chr(ord('A') + indexOfClosestCoord), end='')
-		else:
-			print(indexOfClosestCoord, end='')
+			continue
+
+		# any duplicate distances at all, and we consider there is no 'closest'
+		#. --- nope, stupid question wording. It's dupes of the closest distances that cause '.' to appear!
+
+		# print('distances counter = ', distancesCounter)
+		# print('minDist =',minDist)
+		if distancesCounter[minDist] > 1:
+			# print('got a dupe! dists = ', distancesCounter)
+			print('.', end='')
+			continue
+
+		indexOfClosestCoord = dists.index(uniqueDistancesSorted[0])
+
+		print(indexOfClosestCoord, end='')
 	print('')
 
 # we can't discount the infinite area items yet - need to take them into account when calculating the distances.
