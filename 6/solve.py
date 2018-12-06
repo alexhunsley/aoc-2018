@@ -3,8 +3,7 @@
 import sys
 from operator import methodcaller
 from functools import reduce
-from collections import Counter
-
+from collections import Counter, defaultdict
 f = open("input.txt")
 
 # contents = f.readlines()
@@ -14,7 +13,7 @@ f = open("input.txt")
 # # temp, just to keep stuff simpler
 
 # print(contents)
-# # contents = [[lineIndex] for lineIndex in range(0, 3)]
+# # contents = [[line§] for lineIndex in range(0, 3)]
 # # contents = [list(lineIndex) for lineIndex in range(0, len(contents))]
 # # contents = [[lineIndex].append(contents[lineIndex]) for lineIndex in range(0, len(contents))]
 
@@ -66,6 +65,9 @@ print
 
 border = 1
 
+closestTargetToCoordDict = defaultdict(set)
+
+
 # for y in range(4, 5):
 for y in range(minY - border, maxY + 1 + border):
 	for x in range(minX - border, maxX + 1 + border):
@@ -89,6 +91,8 @@ for y in range(minY - border, maxY + 1 + border):
 		assert uniqueDistancesSorted
 
 		if (uniqueDistancesSorted[0] == 0):
+			# don't forget to add a closest count for the actual square containing a target
+			closestTargetToCoordDict[indexOfClosestCoord].add((x, y))
 			print(chr(ord('A') + indexOfClosestCoord), end='')
 			continue
 
@@ -104,11 +108,43 @@ for y in range(minY - border, maxY + 1 + border):
 
 		indexOfClosestCoord = dists.index(uniqueDistancesSorted[0])
 
+		closestTargetToCoordDict[indexOfClosestCoord].add((x, y))
 		print(indexOfClosestCoord, end='')
 	print('')
 
+# for i in sorted(closestTargetToCoordDict, key=lambda x:len(closestTargetToCoordDict[x]), reverse=True):
+# 	print(i)
+
+
+sortedTargetDict = sorted(closestTargetToCoordDict, key=lambda x:len(closestTargetToCoordDict[x]), reverse=True)
+targetIndexCoveringMostArea = sortedTargetDict[0]
+
+print('initial dict: ', closestTargetToCoordDict)
+print('sorted target dict: ', sortedTargetDict)
+print('target covering most area: ', targetIndexCoveringMostArea)
+
+targetCoordsWithInfiniteArea = list(filter(lambda c: c[0] == minX or c[0] == maxX or c[1] == minY or c[1] == maxY, coords))
+
+print(' inf area tarfs: ', list(targetCoordsWithInfiniteArea))
+
+
+targetIndexesWithInfiniteArea = list(map(lambda targetCoord: coords.index(targetCoord), targetCoordsWithInfiniteArea))
+# targetIndexesWithInfiniteArea = list(map(lambda targetCoord: targetCoord, targetCoordsWithInfiniteArea))
+print(' inf area target indexes: ', targetIndexesWithInfiniteArea)
+
+
+sortedTargetAreasWithoutInfiniteAreas = [x for x in sortedTargetDict if x not in targetIndexesWithInfiniteArea]
+
+print('sorted areas, minus infinte: ', sortedTargetAreasWithoutInfiniteAreas)
+print(' area of largest region: ', len(closestTargetToCoordDict[ sortedTargetAreasWithoutInfiniteAreas[0] ]))
+
+# call total area for each coord
+
+
 # we can't discount the infinite area items yet - need to take them into account when calculating the distances.
 # we remove them from consideration when considering the highest area region
+
+
 
 
 # for x in range()
