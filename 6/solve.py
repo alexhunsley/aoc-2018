@@ -6,6 +6,12 @@ from functools import reduce
 from collections import Counter, defaultdict
 from tqdm import tqdm
 
+# part 2 plan:
+# for each Y coordinate we scan down over, calc the total manhattan dist to all targets from leftmost X (-10000 or thereabouts). Then move (the dist - 10000) right; that's left-most point L.
+# repeat similarly for the right R. Then add (R - L + 1) points to the area total, continue.
+#
+# TIP: calc the initial manhatten dist. then for each step right your M dist actually decrements by <number of targets>...
+
 # part 2
 safeRegionMaxDistance = 10000
 
