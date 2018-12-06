@@ -22,8 +22,13 @@ contents = contents[0:2]
 
 # map in py3 returns an iterable!
 
+# contents = [[lineIndex, contents[lineIndex]] for lineIndex in range(0, len(contents))]
+# print('with line indexes: ', contents)
+
 # the inner map converts the list of coordinates from string pairs to int pairs
-coords = list(map(lambda line: list(map(int, line.rstrip().replace(' ', '').split(','))), contents))
+# coords = list(map(lambda line: list(map(int, line.rstrip().replace(' ', '').split(','))), contents))
+coords = list(map(lambda lineIndex: list(map(int, contents[lineIndex].rstrip().replace(' ', '').split(','))), range(0, len(contents))))
+
 print('coords: ', coords)
 # print("it is", [item for item in coords])
 
