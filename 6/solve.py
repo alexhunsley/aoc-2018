@@ -7,12 +7,36 @@ from collections import Counter, defaultdict
 from tqdm import tqdm
 
 # part 2 plan:
-# for each Y coordinate we scan down over, calc the total manhattan dist to all targets from leftmost X (-10000 or thereabouts). Then move (the dist - 10000) right; that's left-most point L.
-# repeat similarly for the right R. Then add (R - L + 1) points to the area total, continue.
 #
-# TIP: calc the initial manhatten dist. then for each step right your M dist actually decrements by <number of targets>...
+# Basic idea:
+# for each Y coordinate we scan down over (from minY - 10000 to maxY + 10000), calc the 
+# total manhattan dist to all targets from minX - 1. Then move (10000 - totalDist)/numTargets to left; 
+# that's left-most point L which is within range.
+# Repeat similarly for the right R (using maxX + 1). Then add (R - L + 1) points to the area total.
+#
+# Worked example:
+# minX = 21. There are 5 targets. Suppose for a given Y: 
+# manhattanDist(minX-1, Y) = 9989.
+# For each decrement of X from that point, the manhattanDist will increase by 5.
+# Therefore, we want to move left by floor((9999 - 9989)/numTargets) = 2.
+# So in general, move left by floor((maxDist - manhattanDist(minX-1, Y)) / numTargets).
+# And on the right, we move right by floor((maxDist - manhattanDist(maxX+1, Y)) / numTargets)
+#
+#
+# Refinment on the basic idea:
+# Let 'target bounds area' (TBA) be the bounding region for all the targets.
+#
+# Calcs in TBA are non-trivial, but this area is small.
+#
+# Outside the TBA, we can do a much more efficient calculation:
+# calc L' = manhattanDist(minX, minY),
+#      R' = manhattanDist(maxX, minY).
+# As you move up, L' and R' move towards TBA at rate of numTargets for every Y step up.
+# Hence, we have a triangle shape above TBA that we can easily calculate the area for!
+# So you get all that coverage for just 2 manhattan distance calcs.
+#  (-- not sure it's worth the bother. Try just the basic scan in part 1 first.)
+#
 
-# part 2
 safeRegionMaxDistance = 10000
 
 coords = []
@@ -44,7 +68,7 @@ print
 # border = 1
 
 #for part 2 use this:
-border = 10000
+border = 1
 
 closestTargetToCoordDict = defaultdict(set)
 
@@ -54,8 +78,8 @@ for y in tqdm(range(minY - border, maxY + 1 + border)):
 	for x in range(minX - border, maxX + 1 + border):
 		dists = [(abs(x - targetX) + abs(y - targetY)) for (targetX, targetY) in coords]
 
-		if sum(dists) < safeRegionMaxDistance:
-			safeSquareCount += 1
+		# if sum(dists) < safeRegionMaxDistance:
+		# 	safeSquareCount += 1
 
 		distancesCounter = Counter(dists)
 		minDist = min(distancesCounter)
@@ -104,4 +128,5 @@ sortedTargetAreasWithoutInfiniteAreas = [x for x in sortedTargetDict if x not in
 
 # print('sorted areas, minus infinte: ', sortedTargetAreasWithoutInfiniteAreas)
 print(' Part 1: area of largest region: ', len(closestTargetToCoordDict[ sortedTargetAreasWithoutInfiniteAreas[0] ]))
-print(' Part 2: safe square count: ', safeSquareCount)
+
+# print(' Part 2: safe square count: ', safeSquareCount)
