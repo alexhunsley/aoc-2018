@@ -62,65 +62,69 @@ print
 # border = 1
 
 #for part 2 use this:
-border = 0
 
-closestTargetToCoordDict = defaultdict(set)
+def solvePart1():
+	border = 0
 
-# safeSquareCount = 0
+	closestTargetToCoordDict = defaultdict(set)
 
-for y in tqdm(range(minY - border, maxY + 1 + border)):
-	for x in range(minX - border, maxX + 1 + border):
-		dists = [(abs(x - targetX) + abs(y - targetY)) for (targetX, targetY) in coords]
+	# safeSquareCount = 0
 
-		# if sum(dists) < safeRegionMaxDistance:
-		# 	safeSquareCount += 1
+	for y in tqdm(range(minY - border, maxY + 1 + border)):
+		for x in range(minX - border, maxX + 1 + border):
+			dists = [(abs(x - targetX) + abs(y - targetY)) for (targetX, targetY) in coords]
 
-		distancesCounter = Counter(dists)
-		minDist = min(distancesCounter)
+			# if sum(dists) < safeRegionMaxDistance:
+			# 	safeSquareCount += 1
 
-		duplicateDistances = [dist for dist in distancesCounter if distancesCounter[dist] > 1]
-		uniqueDistancesSorted = [dist for dist in distancesCounter if distancesCounter[dist] == 1]
-		uniqueDistancesSorted.sort()
+			distancesCounter = Counter(dists)
+			minDist = min(distancesCounter)
 
-		assert uniqueDistancesSorted
+			duplicateDistances = [dist for dist in distancesCounter if distancesCounter[dist] > 1]
+			uniqueDistancesSorted = [dist for dist in distancesCounter if distancesCounter[dist] == 1]
+			uniqueDistancesSorted.sort()
 
-		if (uniqueDistancesSorted[0] == 0):
-			# don't forget to add a closest count for the actual square containing a target
+			assert uniqueDistancesSorted
+
+			if (uniqueDistancesSorted[0] == 0):
+				# don't forget to add a closest count for the actual square containing a target
+				closestTargetToCoordDict[indexOfClosestCoord].add((x, y))
+				# print(chr(ord('A') + indexOfClosestCoord), end='')
+				continue
+
+			# any duplicate distances at all, and we consider there is no 'closest'
+			#. --- nope, stupid question wording. It's dupes of only the closest distance that causes '.' to appear!
+			if distancesCounter[minDist] > 1:
+				# print('.', end='')
+				continue
+
+			indexOfClosestCoord = dists.index(uniqueDistancesSorted[0])
+
 			closestTargetToCoordDict[indexOfClosestCoord].add((x, y))
-			# print(chr(ord('A') + indexOfClosestCoord), end='')
-			continue
-
-		# any duplicate distances at all, and we consider there is no 'closest'
-		#. --- nope, stupid question wording. It's dupes of only the closest distance that causes '.' to appear!
-		if distancesCounter[minDist] > 1:
-			# print('.', end='')
-			continue
-
-		indexOfClosestCoord = dists.index(uniqueDistancesSorted[0])
-
-		closestTargetToCoordDict[indexOfClosestCoord].add((x, y))
-		# print(indexOfClosestCoord, end='')
-	# print('')
+			# print(indexOfClosestCoord, end='')
+		# print('')
 
 
-sortedTargetDict = sorted(closestTargetToCoordDict, key=lambda x:len(closestTargetToCoordDict[x]), reverse=True)
-targetIndexCoveringMostArea = sortedTargetDict[0]
+	sortedTargetDict = sorted(closestTargetToCoordDict, key=lambda x:len(closestTargetToCoordDict[x]), reverse=True)
+	targetIndexCoveringMostArea = sortedTargetDict[0]
 
-# print('initial dict: ', closestTargetToCoordDict)
-# print('sorted target dict: ', sortedTargetDict)
-# print('target covering most area: ', targetIndexCoveringMostArea)
+	# print('initial dict: ', closestTargetToCoordDict)
+	# print('sorted target dict: ', sortedTargetDict)
+	# print('target covering most area: ', targetIndexCoveringMostArea)
 
-targetCoordsWithInfiniteArea = list(filter(lambda c: c[0] == minX or c[0] == maxX or c[1] == minY or c[1] == maxY, coords))
+	targetCoordsWithInfiniteArea = list(filter(lambda c: c[0] == minX or c[0] == maxX or c[1] == minY or c[1] == maxY, coords))
 
-# print(' inf area tarfs: ', list(targetCoordsWithInfiniteArea))
+	# print(' inf area tarfs: ', list(targetCoordsWithInfiniteArea))
 
-targetIndexesWithInfiniteArea = list(map(lambda targetCoord: coords.index(targetCoord), targetCoordsWithInfiniteArea))
-# targetIndexesWithInfiniteArea = list(map(lambda targetCoord: targetCoord, targetCoordsWithInfiniteArea))
-# print(' inf area target indexes: ', targetIndexesWithInfiniteArea)
+	targetIndexesWithInfiniteArea = list(map(lambda targetCoord: coords.index(targetCoord), targetCoordsWithInfiniteArea))
+	# targetIndexesWithInfiniteArea = list(map(lambda targetCoord: targetCoord, targetCoordsWithInfiniteArea))
+	# print(' inf area target indexes: ', targetIndexesWithInfiniteArea)
 
-sortedTargetAreasWithoutInfiniteAreas = [x for x in sortedTargetDict if x not in targetIndexesWithInfiniteArea]
+	sortedTargetAreasWithoutInfiniteAreas = [x for x in sortedTargetDict if x not in targetIndexesWithInfiniteArea]
 
-# print('sorted areas, minus infinte: ', sortedTargetAreasWithoutInfiniteAreas)
-print(' Part 1: area of largest region: ', len(closestTargetToCoordDict[ sortedTargetAreasWithoutInfiniteAreas[0] ]))
+	# print('sorted areas, minus infinte: ', sortedTargetAreasWithoutInfiniteAreas)
+	print(' Part 1: area of largest region: ', len(closestTargetToCoordDict[ sortedTargetAreasWithoutInfiniteAreas[0] ]))
 
-# print(' Part 2: safe square count: ', safeSquareCount)
+	# print(' Part 2: safe square count: ', safeSquareCount)
+
+solvePart1()
