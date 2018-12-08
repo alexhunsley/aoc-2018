@@ -47,7 +47,10 @@ coords = []
 
 lineIndex = 0
 
-f = open("input.txt")
+# f = open("input.txt")
+# f = open("input_3targets_noFiniteAreas.txt")
+f = open("input_4targets.txt")
+# f = open("input_1target_noFiniteAreas.txt")
 
 for line in f.readlines():
 	coordsAsList = list(map(int, line.rstrip().replace(' ', '').split(',')))
@@ -92,7 +95,15 @@ def solvePart1():
 			uniqueDistancesSorted = [dist for dist in distancesCounter if distancesCounter[dist] == 1]
 			uniqueDistancesSorted.sort()
 
-			assert uniqueDistancesSorted
+			# uniqueDistancesSorted can legitimately be empty
+			# assert uniqueDistancesSorted
+			# any duplicate distances at all, and we consider there is no 'closest'
+			#. --- nope, stupid question wording. It's dupes of only the closest distance that causes '.' to appear!
+			if not uniqueDistancesSorted or distancesCounter[minDist] > 1:
+				gridPrint('.')
+				continue
+
+			indexOfClosestCoord = dists.index(uniqueDistancesSorted[0])
 
 			if (uniqueDistancesSorted[0] == 0):
 				# don't forget to add a closest count for the actual square containing a target
@@ -100,14 +111,6 @@ def solvePart1():
 
 				gridPrint(chr(ord('A') + indexOfClosestCoord))
 				continue
-
-			# any duplicate distances at all, and we consider there is no 'closest'
-			#. --- nope, stupid question wording. It's dupes of only the closest distance that causes '.' to appear!
-			if distancesCounter[minDist] > 1:
-				gridPrint('.')
-				continue
-
-			indexOfClosestCoord = dists.index(uniqueDistancesSorted[0])
 
 			closestTargetToCoordDict[indexOfClosestCoord].add((x, y))
 			gridPrint(indexOfClosestCoord)
@@ -131,8 +134,11 @@ def solvePart1():
 
 	sortedTargetAreasWithoutInfiniteAreas = [x for x in sortedTargetDict if x not in targetIndexesWithInfiniteArea]
 
-	# print('sorted areas, minus infinte: ', sortedTargetAreasWithoutInfiniteAreas)
-	print(' Part 1: area of largest region: ', len(closestTargetToCoordDict[ sortedTargetAreasWithoutInfiniteAreas[0] ]))
+	if not sortedTargetAreasWithoutInfiniteAreas:
+		print(' Part 1: Oops, there are no finite areas in this data set!')
+	else:
+		# print('sorted areas, minus infinte: ', sortedTargetAreasWithoutInfiniteAreas)
+		print(' Part 1: area of largest region: ', len(closestTargetToCoordDict[ sortedTargetAreasWithoutInfiniteAreas[0] ]))
 
 	# print(' Part 2: safe square count: ', safeSquareCount)
 
