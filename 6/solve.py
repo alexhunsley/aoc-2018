@@ -89,9 +89,7 @@ def solvePart1and2():
 		for x in range(minX - border, maxX + 1 + border):
 			dists = [(abs(x - targetX) + abs(y - targetY)) for (targetX, targetY) in coords]
 
-			isInsideSafeArea = False
 			if sum(dists) < safeRegionMaxDistance:
-				isInsideSafeArea = True
 				numSafeSquares += 1
 
 			distancesCounter = Counter(dists)
