@@ -47,7 +47,7 @@ coords = []
 
 lineIndex = 0
 
-f = open("input.txt")
+f = open("input_4targets.txt")
 # f = open("input_3targets_noFiniteAreas.txt")
 # f = open("input_4targets.txt")
 # f = open("input_1target_noFiniteAreas.txt")
@@ -76,7 +76,7 @@ def gridPrint(str):
 		print(str, end='')
 
 def solvePart1():
-	border = 50
+	border = 20
 
 	# image output
 	imgWidth = maxX - minX + 1 + 2 * border
