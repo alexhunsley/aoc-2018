@@ -6,6 +6,11 @@ from functools import reduce
 from collections import Counter, defaultdict
 from tqdm import tqdm
 
+# hmm. the 4 targets file has no finite areas, but this script finds a finite area. So my infinite
+# area detection isn't quite working.
+# To properly detect infinite area targets, we could scan the rectangular border of the bounding region;
+# any target closest to those squares is an infinite area.
+
 # part 2 plan:
 #
 # Basic idea:
