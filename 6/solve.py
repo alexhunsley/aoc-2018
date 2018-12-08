@@ -39,7 +39,7 @@ from tqdm import tqdm
 
 # If True, we see grid display.
 # Otherwise, a tqdm progress is shown.
-outputGrid = True
+outputGrid = False
 
 safeRegionMaxDistance = 10000
 
@@ -47,9 +47,9 @@ coords = []
 
 lineIndex = 0
 
-# f = open("input.txt")
+f = open("input.txt")
 # f = open("input_3targets_noFiniteAreas.txt")
-f = open("input_4targets.txt")
+# f = open("input_4targets.txt")
 # f = open("input_1target_noFiniteAreas.txt")
 
 for line in f.readlines():
@@ -64,6 +64,17 @@ maxY = reduce(max, [item[1] for item in coords])
 
 print
 print
+
+imgWidth = maxX - minX + 1
+imgHeight = maxY - minY + 1
+maxGreylevels = len(coords) - 1
+img = open("map.ppm", "w")
+img.write("P3\n%d %d\n%d\n" % (imgWidth, imgHeight, maxGreylevels))
+
+# P2
+# # feep.pgm
+# 24 7
+# 15
 
 def gridPrint(str):
 	if outputGrid:
@@ -101,6 +112,7 @@ def solvePart1():
 			#. --- nope, stupid question wording. It's dupes of only the closest distance that causes '.' to appear!
 			if not uniqueDistancesSorted or distancesCounter[minDist] > 1:
 				gridPrint('.')
+				img.write('0 0 0  ') # write black pixel for no closest target
 				continue
 
 			indexOfClosestCoord = dists.index(uniqueDistancesSorted[0])
@@ -110,12 +122,18 @@ def solvePart1():
 				closestTargetToCoordDict[indexOfClosestCoord].add((x, y))
 
 				gridPrint(chr(ord('A') + indexOfClosestCoord))
+
+				img.write('%d 0 0  ' % maxGreylevels) # write red pixel for actual target location
+
 				continue
 
 			closestTargetToCoordDict[indexOfClosestCoord].add((x, y))
 			gridPrint(indexOfClosestCoord)
+			img.write('%d %d %d  ' % (indexOfClosestCoord, indexOfClosestCoord, indexOfClosestCoord))
 		gridPrint('\n')
+		img.write('\n')
 
+	img.close()
 
 	sortedTargetDict = sorted(closestTargetToCoordDict, key=lambda x:len(closestTargetToCoordDict[x]), reverse=True)
 	targetIndexCoveringMostArea = sortedTargetDict[0]
