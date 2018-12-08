@@ -65,11 +65,6 @@ maxY = reduce(max, [item[1] for item in coords])
 print
 print
 
-imgWidth = maxX - minX + 1
-imgHeight = maxY - minY + 1
-maxGreylevels = len(coords) - 1
-img = open("map.ppm", "w")
-img.write("P3\n%d %d\n%d\n" % (imgWidth, imgHeight, maxGreylevels))
 
 # P2
 # # feep.pgm
@@ -81,7 +76,15 @@ def gridPrint(str):
 		print(str, end='')
 
 def solvePart1():
-	border = 0
+	border = 50
+
+	# image output
+	imgWidth = maxX - minX + 1 + 2 * border
+	imgHeight = maxY - minY + 1 + 2 * border
+	maxGreylevels = len(coords) - 1
+	img = open("map.ppm", "w")
+	img.write("P3\n%d %d\n%d\n" % (imgWidth, imgHeight, maxGreylevels))
+
 
 	closestTargetToCoordDict = defaultdict(set)
 
