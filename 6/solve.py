@@ -12,7 +12,7 @@ import math
 # To properly detect infinite area targets, we could scan the rectangular border of the bounding region;
 # any target closest to those squares is an infinite area.
 
-# part 2 plan:
+# part 2 plan:  (THIS IS NOT NEEDED FOR INPUT DATA! SAFE AREA IS WITHIN TARGET AREA BOUNDS!)
 #
 # Basic idea:
 # for each Y coordinate we scan down over (from minY - 10000 to maxY + 10000), calc the 
