@@ -47,14 +47,15 @@ import math
 # Otherwise, a tqdm progress is shown.
 outputGrid = False
 
-safeRegionMaxDistance = 50
-# safeRegionMaxDistance = 10000
+# safeRegionMaxDistance = 50
+safeRegionMaxDistance = 10000
 
 coords = []
 
 lineIndex = 0
 
-f = open("input_4targets.txt")
+f = open("input.txt")
+# f = open("input_4targets.txt")
 # f = open("input_3targets_noFiniteAreas.txt")
 # f = open("input_4targets.txt")
 # f = open("input_1target_noFiniteAreas.txt")
@@ -202,9 +203,9 @@ def solvePart2():
 		x = minX
 
 		# left side
-		dists = [(abs(x - targetX) + abs(y - targetY)) for (targetX, targetY) in coords]
+		distsL = [(abs(x - targetX) + abs(y - targetY)) for (targetX, targetY) in coords]
 
-		totalDistsLeftSide = sum(dists)
+		totalDistsLeftSide = sum(distsL)
 
 		leftmostXCoordWithinSafeDistance = x - math.floor((safeRegionMaxDistance - 1 - totalDistsLeftSide) / len(coords))
 
@@ -216,9 +217,9 @@ def solvePart2():
 
 		# right side
 		x = maxX
-		dists = [(abs(x - targetX) + abs(y - targetY)) for (targetX, targetY) in coords]
+		distsR = [(abs(x - targetX) + abs(y - targetY)) for (targetX, targetY) in coords]
 
-		totalDistsRightSide = sum(dists)
+		totalDistsRightSide = sum(distsR)
 
 		rightmostXCoordWithinSafeDistance = x + math.floor((safeRegionMaxDistance - 1 - totalDistsRightSide) / len(coords))
 
@@ -233,8 +234,10 @@ def solvePart2():
 		if numSquaresSafe > 0:
 			totalSafeSquares += numSquaresSafe
 
-	print("DONE! num safe squares: %d" % totalSafeSquares)
+	print("Part 2: num safe squares: %d" % totalSafeSquares)
 
 # solvePart1()
 solvePart2()
+
+# getting 63187 but that's wrong; too high
 
