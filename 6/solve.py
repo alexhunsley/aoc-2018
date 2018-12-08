@@ -41,7 +41,8 @@ from tqdm import tqdm
 # Otherwise, a tqdm progress is shown.
 outputGrid = False
 
-safeRegionMaxDistance = 10000
+safeRegionMaxDistance = 50
+# safeRegionMaxDistance = 10000
 
 coords = []
 
@@ -76,12 +77,12 @@ def gridPrint(str):
 		print(str, end='')
 
 def solvePart1():
-	border = 20
+	border = 40
 
 	# image output
 	imgWidth = maxX - minX + 1 + 2 * border
 	imgHeight = maxY - minY + 1 + 2 * border
-	maxGreylevels = len(coords) - 1
+	maxGreylevels = len(coords)
 	img = open("map.ppm", "w")
 	img.write("P3\n%d %d\n%d\n" % (imgWidth, imgHeight, maxGreylevels))
 
@@ -99,8 +100,9 @@ def solvePart1():
 		for x in range(minX - border, maxX + 1 + border):
 			dists = [(abs(x - targetX) + abs(y - targetY)) for (targetX, targetY) in coords]
 
-			# if sum(dists) < safeRegionMaxDistance:
-			# 	safeSquareCount += 1
+			isInsideSafeArea = False
+			if sum(dists) < safeRegionMaxDistance:
+				isInsideSafeArea = True
 
 			distancesCounter = Counter(dists)
 			minDist = min(distancesCounter)
@@ -132,7 +134,8 @@ def solvePart1():
 
 			closestTargetToCoordDict[indexOfClosestCoord].add((x, y))
 			gridPrint(indexOfClosestCoord)
-			img.write('%d %d %d  ' % (indexOfClosestCoord, indexOfClosestCoord, indexOfClosestCoord))
+
+			img.write('%d %d %d  ' % (indexOfClosestCoord+1, indexOfClosestCoord+1, indexOfClosestCoord+1))
 		gridPrint('\n')
 		img.write('\n')
 
@@ -163,6 +166,98 @@ def solvePart1():
 
 	# print(' Part 2: safe square count: ', safeSquareCount)
 
-solvePart1()
-# solvePart2()
+
+def solvePart2():
+	border = 20
+
+	# image output
+	imgWidth = maxX - minX + 1 + 2 * border
+	imgHeight = maxY - minY + 1 + 2 * border
+	maxGreylevels = len(coords)
+	img = open("map.ppm", "w")
+	img.write("P3\n%d %d\n%d\n" % (imgWidth, imgHeight, maxGreylevels))
+
+
+	closestTargetToCoordDict = defaultdict(set)
+
+	# safeSquareCount = 0
+
+	if outputGrid:
+		yIterator = range(minY - border, maxY + 1 + border)
+	else:
+		yIterator = tqdm(range(minY - border, maxY + 1 + border))
+	
+	for y in yIterator:
+		for x in range(minX - border, maxX + 1 + border):
+			dists = [(abs(x - targetX) + abs(y - targetY)) for (targetX, targetY) in coords]
+
+			totalDists = sum(dists)
+			isInsideSafeArea = (sum(dists) < safeRegionMaxDistance)
+
+			distancesCounter = Counter(dists)
+			minDist = min(distancesCounter)
+
+			duplicateDistances = [dist for dist in distancesCounter if distancesCounter[dist] > 1]
+			uniqueDistancesSorted = [dist for dist in distancesCounter if distancesCounter[dist] == 1]
+			uniqueDistancesSorted.sort()
+
+			# uniqueDistancesSorted can legitimately be empty
+			# assert uniqueDistancesSorted
+			# any duplicate distances at all, and we consider there is no 'closest'
+			#. --- nope, stupid question wording. It's dupes of only the closest distance that causes '.' to appear!
+			if not uniqueDistancesSorted or distancesCounter[minDist] > 1:
+				gridPrint('.')
+				img.write('0 0 0  ') # write black pixel for no closest target
+				continue
+
+			indexOfClosestCoord = dists.index(uniqueDistancesSorted[0])
+
+			if (uniqueDistancesSorted[0] == 0):
+				# don't forget to add a closest count for the actual square containing a target
+				closestTargetToCoordDict[indexOfClosestCoord].add((x, y))
+
+				gridPrint(chr(ord('A') + indexOfClosestCoord))
+
+				img.write('%d 0 0  ' % maxGreylevels) # write red pixel for actual target location
+
+				continue
+
+			closestTargetToCoordDict[indexOfClosestCoord].add((x, y))
+			gridPrint(indexOfClosestCoord)
+			if isInsideSafeArea:
+				img.write('%d %d %d  ' % (indexOfClosestCoord+1, indexOfClosestCoord+1, indexOfClosestCoord+1))
+			else:
+				img.write('%d %d 0  ' % (indexOfClosestCoord+1, indexOfClosestCoord+1))
+		gridPrint('\n')
+		img.write('\n')
+
+	img.close()
+
+	sortedTargetDict = sorted(closestTargetToCoordDict, key=lambda x:len(closestTargetToCoordDict[x]), reverse=True)
+	targetIndexCoveringMostArea = sortedTargetDict[0]
+
+	# print('initial dict: ', closestTargetToCoordDict)
+	# print('sorted target dict: ', sortedTargetDict)
+	# print('target covering most area: ', targetIndexCoveringMostArea)
+
+	targetCoordsWithInfiniteArea = list(filter(lambda c: c[0] == minX or c[0] == maxX or c[1] == minY or c[1] == maxY, coords))
+
+	# print(' inf area tarfs: ', list(targetCoordsWithInfiniteArea))
+
+	targetIndexesWithInfiniteArea = list(map(lambda targetCoord: coords.index(targetCoord), targetCoordsWithInfiniteArea))
+	# targetIndexesWithInfiniteArea = list(map(lambda targetCoord: targetCoord, targetCoordsWithInfiniteArea))
+	# print(' inf area target indexes: ', targetIndexesWithInfiniteArea)
+
+	sortedTargetAreasWithoutInfiniteAreas = [x for x in sortedTargetDict if x not in targetIndexesWithInfiniteArea]
+
+	if not sortedTargetAreasWithoutInfiniteAreas:
+		print(' Part 1: Oops, there are no finite areas in this data set!')
+	else:
+		# print('sorted areas, minus infinte: ', sortedTargetAreasWithoutInfiniteAreas)
+		print(' Part 1: area of largest region: ', len(closestTargetToCoordDict[ sortedTargetAreasWithoutInfiniteAreas[0] ]))
+
+	# print(' Part 2: safe square count: ', safeSquareCount)
+
+# solvePart1()
+solvePart2()
 
