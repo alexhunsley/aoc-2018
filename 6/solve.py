@@ -37,6 +37,10 @@ from tqdm import tqdm
 #  (-- not sure it's worth the bother. Try just the basic scan in part 1 first.)
 #
 
+# If True, we see grid display.
+# Otherwise, a tqdm progress is shown.
+outputGrid = True
+
 safeRegionMaxDistance = 10000
 
 coords = []
@@ -58,10 +62,9 @@ maxY = reduce(max, [item[1] for item in coords])
 print
 print
 
-
-# border = 1
-
-#for part 2 use this:
+def gridPrint(str):
+	if outputGrid:
+		print(str, end='')
 
 def solvePart1():
 	border = 0
@@ -70,7 +73,12 @@ def solvePart1():
 
 	# safeSquareCount = 0
 
-	for y in tqdm(range(minY - border, maxY + 1 + border)):
+	if outputGrid:
+		yIterator = range(minY - border, maxY + 1 + border)
+	else:
+		yIterator = tqdm(range(minY - border, maxY + 1 + border))
+	
+	for y in yIterator:
 		for x in range(minX - border, maxX + 1 + border):
 			dists = [(abs(x - targetX) + abs(y - targetY)) for (targetX, targetY) in coords]
 
@@ -89,20 +97,21 @@ def solvePart1():
 			if (uniqueDistancesSorted[0] == 0):
 				# don't forget to add a closest count for the actual square containing a target
 				closestTargetToCoordDict[indexOfClosestCoord].add((x, y))
-				# print(chr(ord('A') + indexOfClosestCoord), end='')
+
+				gridPrint(chr(ord('A') + indexOfClosestCoord))
 				continue
 
 			# any duplicate distances at all, and we consider there is no 'closest'
 			#. --- nope, stupid question wording. It's dupes of only the closest distance that causes '.' to appear!
 			if distancesCounter[minDist] > 1:
-				# print('.', end='')
+				gridPrint('.')
 				continue
 
 			indexOfClosestCoord = dists.index(uniqueDistancesSorted[0])
 
 			closestTargetToCoordDict[indexOfClosestCoord].add((x, y))
-			# print(indexOfClosestCoord, end='')
-		# print('')
+			gridPrint(indexOfClosestCoord)
+		gridPrint('\n')
 
 
 	sortedTargetDict = sorted(closestTargetToCoordDict, key=lambda x:len(closestTargetToCoordDict[x]), reverse=True)
@@ -128,3 +137,5 @@ def solvePart1():
 	# print(' Part 2: safe square count: ', safeSquareCount)
 
 solvePart1()
+# solvePart2()
+
