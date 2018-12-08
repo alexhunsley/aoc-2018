@@ -55,10 +55,6 @@ while deps:
 
 	deps = depsCopy
 
-print('Part 1: ', taskOrder)
-
-# not the correct answer:
-# SCLPAMQVUWNHODRTGYKBJEFXZ
- 
-
 taskOrder += mostRecentTaskWithLastDependencyRemoved
+
+print('Part 1: ', taskOrder)
