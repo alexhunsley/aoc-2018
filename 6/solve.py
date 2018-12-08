@@ -1,11 +1,10 @@
-# solve.py 6
+# AOC2018 part 6
 #
 import sys
 from operator import methodcaller
 from functools import reduce
 from collections import Counter, defaultdict
 from tqdm import tqdm
-import math
 
 # hmm. the 4 targets file has no finite areas, but this script finds a finite area. So my infinite
 # area detection isn't quite working.
@@ -47,7 +46,6 @@ import math
 # Otherwise, a tqdm progress is shown.
 outputGrid = False
 
-# safeRegionMaxDistance = 50
 safeRegionMaxDistance = 10000
 
 coords = []
@@ -55,10 +53,6 @@ coords = []
 lineIndex = 0
 
 f = open("input.txt")
-# f = open("input_4targets.txt")
-# f = open("input_3targets_noFiniteAreas.txt")
-# f = open("input_4targets.txt")
-# f = open("input_1target_noFiniteAreas.txt")
 
 for line in f.readlines():
 	coordsAsList = list(map(int, line.rstrip().replace(' ', '').split(',')))
@@ -70,15 +64,6 @@ maxX = reduce(max, [item[0] for item in coords])
 minY = reduce(min, [item[1] for item in coords])
 maxY = reduce(max, [item[1] for item in coords])
 
-print
-print
-
-
-# P2
-# # feep.pgm
-# 24 7
-# 15
-
 def gridPrint(str):
 	if outputGrid:
 		print(str, end='')
@@ -86,17 +71,13 @@ def gridPrint(str):
 def solvePart1and2():
 	border = 0
 
-	# image output
 	imgWidth = maxX - minX + 1 + 2 * border
 	imgHeight = maxY - minY + 1 + 2 * border
 	maxGreylevels = len(coords)
 	img = open("map.ppm", "w")
 	img.write("P3\n%d %d\n%d\n" % (imgWidth, imgHeight, maxGreylevels))
 
-
 	closestTargetToCoordDict = defaultdict(set)
-
-	# safeSquareCount = 0
 
 	if outputGrid:
 		yIterator = range(minY - border, maxY + 1 + border)
@@ -120,8 +101,6 @@ def solvePart1and2():
 			uniqueDistancesSorted = [dist for dist in distancesCounter if distancesCounter[dist] == 1]
 			uniqueDistancesSorted.sort()
 
-			# uniqueDistancesSorted can legitimately be empty
-			# assert uniqueDistancesSorted
 			# any duplicate distances at all, and we consider there is no 'closest'
 			#. --- nope, stupid question wording. It's dupes of only the closest distance that causes '.' to appear!
 			if not uniqueDistancesSorted or distancesCounter[minDist] > 1:
@@ -137,7 +116,8 @@ def solvePart1and2():
 
 				gridPrint(chr(ord('A') + indexOfClosestCoord))
 
-				img.write('%d 0 0  ' % maxGreylevels) # write red pixel for actual target location
+				# write red pixel for actual target location
+				img.write('%d 0 0  ' % maxGreylevels)
 
 				continue
 
@@ -153,106 +133,20 @@ def solvePart1and2():
 	sortedTargetDict = sorted(closestTargetToCoordDict, key=lambda x:len(closestTargetToCoordDict[x]), reverse=True)
 	targetIndexCoveringMostArea = sortedTargetDict[0]
 
-	# print('initial dict: ', closestTargetToCoordDict)
-	# print('sorted target dict: ', sortedTargetDict)
-	# print('target covering most area: ', targetIndexCoveringMostArea)
-
 	targetCoordsWithInfiniteArea = list(filter(lambda c: c[0] == minX or c[0] == maxX or c[1] == minY or c[1] == maxY, coords))
 
-	# print(' inf area tarfs: ', list(targetCoordsWithInfiniteArea))
-
 	targetIndexesWithInfiniteArea = list(map(lambda targetCoord: coords.index(targetCoord), targetCoordsWithInfiniteArea))
-	# targetIndexesWithInfiniteArea = list(map(lambda targetCoord: targetCoord, targetCoordsWithInfiniteArea))
-	# print(' inf area target indexes: ', targetIndexesWithInfiniteArea)
 
 	sortedTargetAreasWithoutInfiniteAreas = [x for x in sortedTargetDict if x not in targetIndexesWithInfiniteArea]
 
 	if not sortedTargetAreasWithoutInfiniteAreas:
 		print(' Part 1: Oops, there are no finite areas in this data set!')
 	else:
-		# print('sorted areas, minus infinte: ', sortedTargetAreasWithoutInfiniteAreas)
 		print(' Part 1: area of largest region: ', len(closestTargetToCoordDict[ sortedTargetAreasWithoutInfiniteAreas[0] ]))
 
-	print('Part 2: num safe squares: %d' % numSafeSquares)
-	# print(' Part 2: safe square count: ', safeSquareCount)
+	print(' Part 2: num safe squares: %d' % numSafeSquares)
 
-
-def solvePart2():
-	# +1 needed? Might as well. It's on the correct side of safeness/overkill
-	border = int((safeRegionMaxDistance / len(coords)) + 1)
-	print('border = %d' % border)
-	# image output
-	imgWidth = maxX - minX + 1 + 2 * border
-	imgHeight = maxY - minY + 1 + 2 * border
-	maxGreylevels = len(coords)
-	img = open("map.ppm", "w")
-	img.write("P3\n%d %d\n%d\n" % (imgWidth, imgHeight, maxGreylevels))
-
-
-	closestTargetToCoordDict = defaultdict(set)
-
-	# safeSquareCount = 0
-
-	# if outputGrid:
-	# 	yIterator = range(minY - border, maxY + 1 + border)
-	# else:
-	# 	yIterator = tqdm(range(minY - border, maxY + 1 + border))
-	yIterator = range(minY - border, maxY + 1 + border)
-
-	totalSafeSquares = 0
-
-	for y in yIterator:
-		# topLeft = (minX, y)
-		x = minX
-
-		# left side
-		distsL = [(abs(x - targetX) + abs(y - targetY)) for (targetX, targetY) in coords]
-
-		totalDistsLeftSide = sum(distsL)
-
-		if totalDistsLeftSide >= safeRegionMaxDistance:
-			# TODO just calc this area manually; all bets are off for the optimisation 
-			# if edge of safety is within the target bounding area 
-			leftmostXCoordWithinSafeDistance = 0	
-			pass
-		else:
-			leftmostXCoordWithinSafeDistance = x - math.floor((safeRegionMaxDistance - 1 - totalDistsLeftSide) / len(coords))
-
-			checkDistsL = [(abs(leftmostXCoordWithinSafeDistance - targetX) + abs(y - targetY)) for (targetX, targetY) in coords]
-			checkTotalDistsL = sum(checkDistsL)
-
-			print("LEFT y: %d totalDists: %d   leftMost safe X: %d  totalDistAtLeftmost: %d" 
-				% (y, totalDistsLeftSide, leftmostXCoordWithinSafeDistance, checkTotalDistsL))
-
-		# right side
-		x = maxX
-		distsR = [(abs(x - targetX) + abs(y - targetY)) for (targetX, targetY) in coords]
-
-		totalDistsRightSide = sum(distsR)
-
-		if totalDistsRightSide >= safeRegionMaxDistance:
-			# TODO just calc this area manually; all bets are off for the optimisation 
-			# if edge of safety is within the target bounding area 
-			rightmostXCoordWithinSafeDistance = 0	
-			pass
-		else:
-			rightmostXCoordWithinSafeDistance = x + math.floor((safeRegionMaxDistance - 1 - totalDistsRightSide) / len(coords))
-
-			checkDistsR = [(abs(leftmostXCoordWithinSafeDistance - targetX) + abs(y - targetY)) for (targetX, targetY) in coords]
-			checkTotalDistsR = sum(checkDistsR)
-
-			print("RIGHT y: %d totalDists: %d   rightMost safe X: %d  totalDistAtRightmost: %d" 
-				% (y, totalDistsRightSide, rightmostXCoordWithinSafeDistance, checkTotalDistsR))
-
-		numSquaresSafe = rightmostXCoordWithinSafeDistance - leftmostXCoordWithinSafeDistance + 1
-		print("num safe squares: %d" % numSquaresSafe)
-		if numSquaresSafe > 0:
-			totalSafeSquares += numSquaresSafe
-
-	print("Part 2: num safe squares: %d" % totalSafeSquares)
 
 solvePart1and2()
-# solvePart2()
 
-# getting 63187 but that's wrong; too high
 
