@@ -5,6 +5,7 @@ from operator import methodcaller
 from functools import reduce
 from collections import Counter, defaultdict
 from tqdm import tqdm
+import math
 
 # hmm. the 4 targets file has no finite areas, but this script finds a finite area. So my infinite
 # area detection isn't quite working.
@@ -173,7 +174,8 @@ def solvePart1():
 
 
 def solvePart2():
-	border = 20
+	# +1 needed? Might as well. It's on the correct side of safeness/overkill
+	border = int((safeRegionMaxDistance / len(coords)) + 1)
 
 	# image output
 	imgWidth = maxX - minX + 1 + 2 * border
@@ -187,81 +189,51 @@ def solvePart2():
 
 	# safeSquareCount = 0
 
-	if outputGrid:
-		yIterator = range(minY - border, maxY + 1 + border)
-	else:
-		yIterator = tqdm(range(minY - border, maxY + 1 + border))
-	
+	# if outputGrid:
+	# 	yIterator = range(minY - border, maxY + 1 + border)
+	# else:
+	# 	yIterator = tqdm(range(minY - border, maxY + 1 + border))
+	yIterator = range(minY - border, maxY + 1 + border)
+
+	totalSafeSquares = 0
+
 	for y in yIterator:
-		for x in range(minX - border, maxX + 1 + border):
-			dists = [(abs(x - targetX) + abs(y - targetY)) for (targetX, targetY) in coords]
+		# topLeft = (minX, y)
+		x = minX
 
-			totalDists = sum(dists)
-			isInsideSafeArea = (sum(dists) < safeRegionMaxDistance)
+		# left side
+		dists = [(abs(x - targetX) + abs(y - targetY)) for (targetX, targetY) in coords]
 
-			distancesCounter = Counter(dists)
-			minDist = min(distancesCounter)
+		totalDistsLeftSide = sum(dists)
 
-			duplicateDistances = [dist for dist in distancesCounter if distancesCounter[dist] > 1]
-			uniqueDistancesSorted = [dist for dist in distancesCounter if distancesCounter[dist] == 1]
-			uniqueDistancesSorted.sort()
+		leftmostXCoordWithinSafeDistance = x - math.floor((safeRegionMaxDistance - 1 - totalDistsLeftSide) / len(coords))
 
-			# uniqueDistancesSorted can legitimately be empty
-			# assert uniqueDistancesSorted
-			# any duplicate distances at all, and we consider there is no 'closest'
-			#. --- nope, stupid question wording. It's dupes of only the closest distance that causes '.' to appear!
-			if not uniqueDistancesSorted or distancesCounter[minDist] > 1:
-				gridPrint('.')
-				img.write('0 0 0  ') # write black pixel for no closest target
-				continue
+		checkDistsL = [(abs(leftmostXCoordWithinSafeDistance - targetX) + abs(y - targetY)) for (targetX, targetY) in coords]
+		checkTotalDistsL = sum(checkDistsL)
 
-			indexOfClosestCoord = dists.index(uniqueDistancesSorted[0])
+		print("LEFT y: %d totalDists: %d   leftMost safe X: %d  totalDistAtLeftmost: %d" 
+			% (y, totalDistsLeftSide, leftmostXCoordWithinSafeDistance, checkTotalDistsL))
 
-			if (uniqueDistancesSorted[0] == 0):
-				# don't forget to add a closest count for the actual square containing a target
-				closestTargetToCoordDict[indexOfClosestCoord].add((x, y))
+		# right side
+		x = maxX
+		dists = [(abs(x - targetX) + abs(y - targetY)) for (targetX, targetY) in coords]
 
-				gridPrint(chr(ord('A') + indexOfClosestCoord))
+		totalDistsRightSide = sum(dists)
 
-				img.write('%d 0 0  ' % maxGreylevels) # write red pixel for actual target location
+		rightmostXCoordWithinSafeDistance = x + math.floor((safeRegionMaxDistance - 1 - totalDistsRightSide) / len(coords))
 
-				continue
+		checkDistsR = [(abs(leftmostXCoordWithinSafeDistance - targetX) + abs(y - targetY)) for (targetX, targetY) in coords]
+		checkTotalDistsR = sum(checkDistsR)
 
-			closestTargetToCoordDict[indexOfClosestCoord].add((x, y))
-			gridPrint(indexOfClosestCoord)
-			if isInsideSafeArea:
-				img.write('%d %d %d  ' % (indexOfClosestCoord+1, indexOfClosestCoord+1, indexOfClosestCoord+1))
-			else:
-				img.write('%d %d 0  ' % (indexOfClosestCoord+1, indexOfClosestCoord+1))
-		gridPrint('\n')
-		img.write('\n')
+		print("RIGHT y: %d totalDists: %d   rightMost safe X: %d  totalDistAtRightmost: %d" 
+			% (y, totalDistsRightSide, rightmostXCoordWithinSafeDistance, checkTotalDistsR))
 
-	img.close()
+		numSquaresSafe = rightmostXCoordWithinSafeDistance - leftmostXCoordWithinSafeDistance + 1
+		print("num safe squares: %d" % numSquaresSafe)
+		if numSquaresSafe > 0:
+			totalSafeSquares += numSquaresSafe
 
-	sortedTargetDict = sorted(closestTargetToCoordDict, key=lambda x:len(closestTargetToCoordDict[x]), reverse=True)
-	targetIndexCoveringMostArea = sortedTargetDict[0]
-
-	# print('initial dict: ', closestTargetToCoordDict)
-	# print('sorted target dict: ', sortedTargetDict)
-	# print('target covering most area: ', targetIndexCoveringMostArea)
-
-	targetCoordsWithInfiniteArea = list(filter(lambda c: c[0] == minX or c[0] == maxX or c[1] == minY or c[1] == maxY, coords))
-
-	# print(' inf area tarfs: ', list(targetCoordsWithInfiniteArea))
-
-	targetIndexesWithInfiniteArea = list(map(lambda targetCoord: coords.index(targetCoord), targetCoordsWithInfiniteArea))
-	# targetIndexesWithInfiniteArea = list(map(lambda targetCoord: targetCoord, targetCoordsWithInfiniteArea))
-	# print(' inf area target indexes: ', targetIndexesWithInfiniteArea)
-
-	sortedTargetAreasWithoutInfiniteAreas = [x for x in sortedTargetDict if x not in targetIndexesWithInfiniteArea]
-
-	if not sortedTargetAreasWithoutInfiniteAreas:
-		print(' Part 1: Oops, there are no finite areas in this data set!')
-	else:
-		# print('sorted areas, minus infinte: ', sortedTargetAreasWithoutInfiniteAreas)
-		print(' Part 1: area of largest region: ', len(closestTargetToCoordDict[ sortedTargetAreasWithoutInfiniteAreas[0] ]))
-
-	# print(' Part 2: safe square count: ', safeSquareCount)
+	print("DONE! num safe squares: %d" % totalSafeSquares)
 
 # solvePart1()
 solvePart2()
