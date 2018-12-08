@@ -83,8 +83,8 @@ def gridPrint(str):
 	if outputGrid:
 		print(str, end='')
 
-def solvePart1():
-	border = 40
+def solvePart1and2():
+	border = 0
 
 	# image output
 	imgWidth = maxX - minX + 1 + 2 * border
@@ -103,6 +103,7 @@ def solvePart1():
 	else:
 		yIterator = tqdm(range(minY - border, maxY + 1 + border))
 	
+	numSafeSquares = 0
 	for y in yIterator:
 		for x in range(minX - border, maxX + 1 + border):
 			dists = [(abs(x - targetX) + abs(y - targetY)) for (targetX, targetY) in coords]
@@ -110,6 +111,7 @@ def solvePart1():
 			isInsideSafeArea = False
 			if sum(dists) < safeRegionMaxDistance:
 				isInsideSafeArea = True
+				numSafeSquares += 1
 
 			distancesCounter = Counter(dists)
 			minDist = min(distancesCounter)
@@ -171,13 +173,14 @@ def solvePart1():
 		# print('sorted areas, minus infinte: ', sortedTargetAreasWithoutInfiniteAreas)
 		print(' Part 1: area of largest region: ', len(closestTargetToCoordDict[ sortedTargetAreasWithoutInfiniteAreas[0] ]))
 
+	print('Part 2: num safe squares: %d' % numSafeSquares)
 	# print(' Part 2: safe square count: ', safeSquareCount)
 
 
 def solvePart2():
 	# +1 needed? Might as well. It's on the correct side of safeness/overkill
 	border = int((safeRegionMaxDistance / len(coords)) + 1)
-
+	print('border = %d' % border)
 	# image output
 	imgWidth = maxX - minX + 1 + 2 * border
 	imgHeight = maxY - minY + 1 + 2 * border
@@ -207,13 +210,19 @@ def solvePart2():
 
 		totalDistsLeftSide = sum(distsL)
 
-		leftmostXCoordWithinSafeDistance = x - math.floor((safeRegionMaxDistance - 1 - totalDistsLeftSide) / len(coords))
+		if totalDistsLeftSide >= safeRegionMaxDistance:
+			# TODO just calc this area manually; all bets are off for the optimisation 
+			# if edge of safety is within the target bounding area 
+			leftmostXCoordWithinSafeDistance = 0	
+			pass
+		else:
+			leftmostXCoordWithinSafeDistance = x - math.floor((safeRegionMaxDistance - 1 - totalDistsLeftSide) / len(coords))
 
-		checkDistsL = [(abs(leftmostXCoordWithinSafeDistance - targetX) + abs(y - targetY)) for (targetX, targetY) in coords]
-		checkTotalDistsL = sum(checkDistsL)
+			checkDistsL = [(abs(leftmostXCoordWithinSafeDistance - targetX) + abs(y - targetY)) for (targetX, targetY) in coords]
+			checkTotalDistsL = sum(checkDistsL)
 
-		print("LEFT y: %d totalDists: %d   leftMost safe X: %d  totalDistAtLeftmost: %d" 
-			% (y, totalDistsLeftSide, leftmostXCoordWithinSafeDistance, checkTotalDistsL))
+			print("LEFT y: %d totalDists: %d   leftMost safe X: %d  totalDistAtLeftmost: %d" 
+				% (y, totalDistsLeftSide, leftmostXCoordWithinSafeDistance, checkTotalDistsL))
 
 		# right side
 		x = maxX
@@ -221,13 +230,19 @@ def solvePart2():
 
 		totalDistsRightSide = sum(distsR)
 
-		rightmostXCoordWithinSafeDistance = x + math.floor((safeRegionMaxDistance - 1 - totalDistsRightSide) / len(coords))
+		if totalDistsRightSide >= safeRegionMaxDistance:
+			# TODO just calc this area manually; all bets are off for the optimisation 
+			# if edge of safety is within the target bounding area 
+			rightmostXCoordWithinSafeDistance = 0	
+			pass
+		else:
+			rightmostXCoordWithinSafeDistance = x + math.floor((safeRegionMaxDistance - 1 - totalDistsRightSide) / len(coords))
 
-		checkDistsR = [(abs(leftmostXCoordWithinSafeDistance - targetX) + abs(y - targetY)) for (targetX, targetY) in coords]
-		checkTotalDistsR = sum(checkDistsR)
+			checkDistsR = [(abs(leftmostXCoordWithinSafeDistance - targetX) + abs(y - targetY)) for (targetX, targetY) in coords]
+			checkTotalDistsR = sum(checkDistsR)
 
-		print("RIGHT y: %d totalDists: %d   rightMost safe X: %d  totalDistAtRightmost: %d" 
-			% (y, totalDistsRightSide, rightmostXCoordWithinSafeDistance, checkTotalDistsR))
+			print("RIGHT y: %d totalDists: %d   rightMost safe X: %d  totalDistAtRightmost: %d" 
+				% (y, totalDistsRightSide, rightmostXCoordWithinSafeDistance, checkTotalDistsR))
 
 		numSquaresSafe = rightmostXCoordWithinSafeDistance - leftmostXCoordWithinSafeDistance + 1
 		print("num safe squares: %d" % numSquaresSafe)
@@ -236,8 +251,8 @@ def solvePart2():
 
 	print("Part 2: num safe squares: %d" % totalSafeSquares)
 
-# solvePart1()
-solvePart2()
+solvePart1and2()
+# solvePart2()
 
 # getting 63187 but that's wrong; too high
 
