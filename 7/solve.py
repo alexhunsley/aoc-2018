@@ -62,6 +62,14 @@ def solvePart1():
 def solvePart2(taskOrder):
 	print("part 2 todo")
 
+	# we have five workers (you + four elves).
+	# for each worker we store current task (or '.' for idle),
+	# and seconds remaining of task
+	workerData = [['.', 0]] * 5
+	# print(workerData)
+
+	# ah. we can't just use the order found for part 1.
+	# the time aspect means things can happen in a different order!	
 taskOrder = solvePart1()
 print('Part 1: ', taskOrder)
 
