@@ -32,6 +32,8 @@ for line in f.readlines():
 print(' have read deps=', deps)
 # ensure all tasks with no dependencies are in the default dict
 
+mostRecentTaskWithLastDependencyRemoved = ''
+
 while deps:
 
 	allDependencies = set()
@@ -70,6 +72,7 @@ while deps:
 			print('   (after removal, we have: %s)' % deps2[k])
 			if not deps2[k]:
 				print(' deleting empty set! OMG!!!')
+				mostRecentTaskWithLastDependencyRemoved = k
 				del deps2[k]
 
 	deps = deps2
@@ -81,5 +84,6 @@ while deps:
 	print('============================================ startig again!')
 
 print(deps)
+
+taskOrder += mostRecentTaskWithLastDependencyRemoved
 print(taskOrder)
-	# print(dependency, dependee)
