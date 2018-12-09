@@ -69,8 +69,6 @@ def solvePart1():
 	for d in tasksWithNoDependency:
 		deps[d] = set()
 
-	mostRecentTaskWithLastDependencyRemoved = ''
-
 	while True:
 		# our finishing condition
 		idleWorkers = [worker for worker in workerData if worker[WORKER_DATA_INDEX_TASK_ID] == '.']
