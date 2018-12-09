@@ -23,14 +23,14 @@ from itertools import chain
 import pprint
 from copy import copy, deepcopy
 from itertools import repeat
+from functools import reduce
 
 # we have five workers (you + four elves).
 # numWorkers = 5
 numWorkers = 2
 
 WORKER_DATA_INDEX_TASK_ID = 0
-WORKER_DATA_INDEX_TIME_STARTED = 1
-WORKER_DATA_INDEX_TASK_DURATION = 2
+WORKER_DATA_INDEX_TASK_FINISH_TIME = 1
 
 # 0 for the example, 60 for actual input data
 taskTimeExcessSeconds = 0
@@ -38,23 +38,28 @@ taskTimeExcessSeconds = 0
 # for each worker we store current task (or '.' for idle),
 # time task started (since second 0), and task duration
 # workerData = list(repeat(['.', -1, -1], numWorkers)) 
-workerData = [['.', -1, -1] for i in range(0, numWorkers)]
+workerData = [['.', -1] for i in range(0, numWorkers)]
 
 # print(workerData)
 # workerData[0][0] = 999
 # print(workerData)
 # sys.exit(1)
 
-# seonds since workers started making the sleigh
-currentTimeSeconds = 0
 
 tasksExecutable = set()
 
+def calcTaskDuration(taskId):
+	return ord(taskId) - ord('A') + 1 + taskTimeExcessSeconds
+
 def solvePart1():	
 	global tasksExecutable
+	
+	# seonds since workers started making the sleigh
+	currentTimeSeconds = 0
 
 	# f = open("input.txt")
-	f = open("sampleInput.txt")
+	# f = open("sampleInput.txt")
+	f = open("mySimpleInput.txt")
 
 	deps = defaultdict(set)
 
@@ -68,7 +73,10 @@ def solvePart1():
 
 	mostRecentTaskWithLastDependencyRemoved = ''
 
+	loops = 0
+
 	while deps:
+		print('--------------------------------------------------------')
 		print('start loop, workers =', workerData)
 		allDependencies = set()
 		allDependees = set()
@@ -97,8 +105,12 @@ def solvePart1():
 		for worker in idleWorkers:
 			taskId = tasksExecutableList.pop(0)
 			worker[WORKER_DATA_INDEX_TASK_ID] = taskId 
-			worker[WORKER_DATA_INDEX_TIME_STARTED] = currentTimeSeconds
-			worker[WORKER_DATA_INDEX_TASK_DURATION] = ord(taskId) - ord('A') + 1 + taskTimeExcessSeconds
+			taskDuration = calcTaskDuration(taskId)
+			worker[WORKER_DATA_INDEX_TASK_FINISH_TIME] = currentTimeSeconds + taskDuration
+
+			# you popped the task from the sorted list, but not the original set!
+			# do that.
+			tasksExecutable.remove(taskId)
 
 			print('made a new worker: ', worker)
 			if not tasksExecutableList:
@@ -108,30 +120,54 @@ def solvePart1():
 		print('after scheduling all tasks I could, all workers = ', workerData)
 
 		# when is the nearest second time that one or more tasks complete?
-		
+		activeWorkers = [worker for worker in workerData if worker[WORKER_DATA_INDEX_TASK_ID] != '.']
+		print('activeWorkers = ', activeWorkers)
+		nearestTimeATasksWillComplete = reduce(min, [worker[WORKER_DATA_INDEX_TASK_FINISH_TIME] for worker in activeWorkers])
+		print('nearestTimeATasksWillComplete: ', nearestTimeATasksWillComplete)
 
-		# note: only do the first task! not all! then
-		# we need to recalc what to do next.
+		workersCompleting = [worker for worker in workerData if worker[WORKER_DATA_INDEX_TASK_FINISH_TIME] == nearestTimeATasksWillComplete]
+		# mark them all as complete
 
-		# taskOrder += tasksExecutableList[0]
+		workersCompleting.sort(key=lambda worker: worker[WORKER_DATA_INDEX_TASK_ID], reverse=False)
+		print('  so workers completing then: ', workersCompleting)
 
-		# depsCopy = deepcopy(deps)
+		for workerDone in workersCompleting:
+			# taskOrder += tasksExecutableList[0]
+			taskId = workerDone[WORKER_DATA_INDEX_TASK_ID]
+			taskOrder += taskId
+				
+			depsCopy = deepcopy(deps)
 
-		# # remove task from all deps now it's done
-		# for k, v in deps.items():
-		# 	if tasksExecutableList[0] in v:
-		# 		depsCopy[k].remove(tasksExecutableList[0])
-		# 		if not depsCopy[k]:
-		# 			del depsCopy[k]
-		# 			mostRecentTaskWithLastDependencyRemoved = k
+			# remove task from all deps now it's done
+			for k, v in deps.items():
+				if taskId in v:
+					depsCopy[k].remove(taskId)
+					if not depsCopy[k]:
+						del depsCopy[k]
+						mostRecentTaskWithLastDependencyRemoved = k
 
-		# deps = depsCopy
+			deps = depsCopy
+			
+			# make worker idle again
+			workerDone[WORKER_DATA_INDEX_TASK_ID] = '.'
+			# not stricly necessary, but good principle
+			workerDone[WORKER_DATA_INDEX_TASK_FINISH_TIME] = -1
+
+		currentTimeSeconds = nearestTimeATasksWillComplete
+		print('==== after processing all due workers, we have time = %d, workers = %s' % (currentTimeSeconds, workerData))
 		
 		# TEMP
-		break
+		# loops += 1
+		# if (loops == 5):
+		# 	break
 
+	# take into accoutn the last thing to complete
 	taskOrder += mostRecentTaskWithLastDependencyRemoved
+	currentTimeSeconds += calcTaskDuration(mostRecentTaskWithLastDependencyRemoved)
+
+	print(' final reckoning: time = %d' % currentTimeSeconds)
 	return taskOrder
+
 
 taskOrder = solvePart1()
 print('Part 1: ', taskOrder)
