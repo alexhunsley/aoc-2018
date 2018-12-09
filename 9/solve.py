@@ -9,9 +9,15 @@
 # "last marble is worth 1618 points" - they just mean it is marble 1618.
 # That marble is actually not worth anything, since it's not div by 23!
 
+#
+# feedback: 
+# "last marble were 100 times larger" -- ambiguous. "100 times the size"
+# much preferable.
+
 from collections import defaultdict
 import sys
 from functools import reduce
+from tqdm import tqdm
 
 marbles = [0]
 currentMarble = 0
@@ -49,7 +55,7 @@ outputMarbles()
 # print(indexOfMarbleWithClockwiseOffset(0, -3))
 # print('---------')
 
-for i in range(0, 71787 + 1):
+for i in tqdm(range(0, (100 * 71787) + 1)):
 	# print('i=', i)
 	if nextMarbleIndex > 0 and (nextMarbleIndex % 23) == 0:
 		pointsScored = nextMarbleIndex
