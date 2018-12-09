@@ -52,12 +52,9 @@ outputMarbles()
 for i in range(0, 71787 + 1):
 	# print('i=', i)
 	if nextMarbleIndex > 0 and (nextMarbleIndex % 23) == 0:
-		print('-------------------------------------------------------------')
-		print('--------------- RULE B!')
 		pointsScored = nextMarbleIndex
 
 		marbleIndexForRemoval = indexOfMarbleWithClockwiseOffset(currentMarble, -7)
-		print('  marbleIndexForRemoval = ', marbleIndexForRemoval)
 
 		# what if it's the last one though?
 		pointsScored += marbles.pop(marbleIndexForRemoval)
@@ -70,12 +67,8 @@ for i in range(0, 71787 + 1):
 			currentMarble = marbleIndexForRemoval
 
 
-		print('23 FREAK! elf %d now has score %d (+%d)' % (nextElfToPlay, elfScores[nextElfToPlay], pointsScored))
-
-
-		if elfScores[nextElfToPlay] == 8317:
-			print('hit the high score! marbleIdx = %d, scores = %s' % (nextMarbleIndex, elfScores))
-		# print(' an elf now has score', elfScores[nextElfToPlay])
+		# if elfScores[nextElfToPlay] == 8317:
+		# 	print('hit the high score! marbleIdx = %d, scores = %s' % (nextMarbleIndex, elfScores))
 	else:
 		placeMarbleIndex = indexOfMarbleWithClockwiseOffset(currentMarble, 1)
 		# print('marble %d, elf %d, want to place at index %d' % (nextMarbleIndex, nextElfToPlay, placeMarbleIndex))
