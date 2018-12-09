@@ -18,6 +18,11 @@
 #
 #
 #
+
+# before: I was removing a task with no dependencies.
+# NEW: keep task without depencies - just have empty set!
+# then the loop will work better without nonse.
+
 from collections import Counter, defaultdict
 from itertools import chain
 import pprint
@@ -65,59 +70,91 @@ def solvePart1():
 
 	taskOrder = ""
 
+	allDependencies = set()
+	allDependees = set()
+	
 	for line in f.readlines():
 		dependency = line[5]
+		allDependencies.add(dependency)
+
 		dependee = line[36]
+		allDependees.add(dependee)
 
 		deps[dependee].add(dependency)
 
+	# explicitly add all tasks with no dependency to the deps dict - 
+	# otherwise, they don't appear as a key
+	tasksWithNoDependency = allDependencies - allDependees
+	print('taskswWithNoDep: ', tasksWithNoDependency)
+
+	for d in tasksWithNoDependency:
+		deps[d] = set()
+
+	print('read deps: ', deps)
+	# print('test read A:', deps['A'])
+	# sys.exit(1)
 	mostRecentTaskWithLastDependencyRemoved = ''
 
 	loops = 0
 
-	while deps:
+	# while deps:
+	while True:
 		print('--------------------------------------------------------')
 		print('start loop, workers =', workerData)
-		allDependencies = set()
-		allDependees = set()
 
-		for k, v in deps.items():
-			allDependees = allDependees.union(k)
-			allDependencies = allDependencies.union(v)
+		# our finishing condition
+		idleWorkers = [worker for worker in workerData if worker[WORKER_DATA_INDEX_TASK_ID] == '.']
+		if len(idleWorkers) == numWorkers and not deps:
+			break
 
-		newlyExecutableTasksSet = allDependencies - allDependees
+		# allDependencies = set()
+		# allDependees = set()
 
+		# for k, v in deps.items():
+		# 	allDependees = allDependees.union(k)
+		# 	allDependencies = allDependencies.union(v)
+
+		# newlyExecutableTasksSet = allDependencies - allDependees
+
+		newlyExecutableTasksSet = set(filter(lambda k: len(deps[k]) == 0, deps))
+
+		# for k, v in deps.items():
+		# 	newlyExecutableTasksSet = newlyExecutableTasksSet.union(filter(lambda dependency: len(dependency) == 0, v))
+		
 		print('currently executable tasks: %s' % tasksExecutable)
 		print('newly executable tasks: %s' % newlyExecutableTasksSet)
 		tasksExecutable = tasksExecutable.union(newlyExecutableTasksSet)
 		print('hence, all tasks now executable = %s' % tasksExecutable)
 
 		tasksExecutableList = list(tasksExecutable)
-		tasksExecutableList.sort()
 
-		assert tasksExecutableList, "No task(s) startable! We expect to have at least one!"
+		if tasksExecutableList:
+			tasksExecutableList.sort()
 
-		# schedule as many tasks as we can - limited by tasks available for scheduling,
-		# and by amount of workers currently idle
-		idleWorkers = [worker for worker in workerData if worker[WORKER_DATA_INDEX_TASK_ID] == '.']
+			# assert tasksExecutableList, "No task(s) startable! We expect to have at least one!"
 
-		print('idle workers = ', idleWorkers)
-		for worker in idleWorkers:
-			taskId = tasksExecutableList.pop(0)
-			worker[WORKER_DATA_INDEX_TASK_ID] = taskId 
-			taskDuration = calcTaskDuration(taskId)
-			worker[WORKER_DATA_INDEX_TASK_FINISH_TIME] = currentTimeSeconds + taskDuration
+			# schedule as many tasks as we can - limited by tasks available for scheduling,
+			# and by amount of workers currently idle
 
-			# you popped the task from the sorted list, but not the original set!
-			# do that.
-			tasksExecutable.remove(taskId)
+			print('idle workers = ', idleWorkers)
+			for worker in idleWorkers:
+				taskId = tasksExecutableList.pop(0)
+				worker[WORKER_DATA_INDEX_TASK_ID] = taskId 
+				taskDuration = calcTaskDuration(taskId)
+				worker[WORKER_DATA_INDEX_TASK_FINISH_TIME] = currentTimeSeconds + taskDuration
 
-			print('made a new worker: ', worker)
-			if not tasksExecutableList:
-				print(' (no tasks left in exec list, so exiting scheduler)')
-				break
+				# you popped the task from the sorted list, but not the original set!
+				# do that.
+				tasksExecutable.remove(taskId)
+				# also remove from original deps
+				del deps[taskId]
 
-		print('after scheduling all tasks I could, all workers = ', workerData)
+				print('made a new worker: ', worker)
+				if not tasksExecutableList:
+					print(' (no tasks left in exec list, so exiting scheduler)')
+					break
+
+			print('after scheduling all tasks I could, all workers = ', workerData)
 
 		# when is the nearest second time that one or more tasks complete?
 		activeWorkers = [worker for worker in workerData if worker[WORKER_DATA_INDEX_TASK_ID] != '.']
@@ -142,9 +179,9 @@ def solvePart1():
 			for k, v in deps.items():
 				if taskId in v:
 					depsCopy[k].remove(taskId)
-					if not depsCopy[k]:
-						del depsCopy[k]
-						mostRecentTaskWithLastDependencyRemoved = k
+					# if not depsCopy[k]:
+					# 	del depsCopy[k]
+						# mostRecentTaskWithLastDependencyRemoved = k
 
 			deps = depsCopy
 			
@@ -154,16 +191,17 @@ def solvePart1():
 			workerDone[WORKER_DATA_INDEX_TASK_FINISH_TIME] = -1
 
 		currentTimeSeconds = nearestTimeATasksWillComplete
-		print('==== after processing all due workers, we have time = %d, workers = %s' % (currentTimeSeconds, workerData))
+		print('==== after processing all due workers, we have time = %d, workers = %s, deps = %s' 
+			% (currentTimeSeconds, workerData, deps))
 		
 		# TEMP
-		# loops += 1
+		# loops += 3
 		# if (loops == 5):
 		# 	break
 
 	# take into accoutn the last thing to complete
-	taskOrder += mostRecentTaskWithLastDependencyRemoved
-	currentTimeSeconds += calcTaskDuration(mostRecentTaskWithLastDependencyRemoved)
+	# taskOrder += mostRecentTaskWithLastDependencyRemoved
+	# currentTimeSeconds += calcTaskDuration(mostRecentTaskWithLastDependencyRemoved)
 
 	print(' final reckoning: time = %d' % currentTimeSeconds)
 	return taskOrder
