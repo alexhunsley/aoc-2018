@@ -10,6 +10,7 @@ from itertools import repeat
 from functools import reduce
 
 f = open("input.txt")
+# f = open("exampleInput.txt")
 
 input = f.read()
 
@@ -24,7 +25,7 @@ input = "2 2 0 2 20 31 0 4 1 2 3 3 1 2"
 #        A---------------------------
 #            B-------- C----------
 
-
+# Ah! can ref child nodes in metadata multiple times! this work? yes.
 
 # we want: ( ( ( (), 20, 30), ( (), 1, 2, 3, 4) ), 10 )
 
@@ -128,7 +129,7 @@ print(' final metadata total = ', metaDataTotal)
 print()
 
 
-print('relations: ', nodeRelations)
+
 
 def valueForNode(nodeId):
 	print('=== ENTER value for node ', nodeId)
@@ -162,6 +163,8 @@ def valueForNode(nodeId):
 	return total
 
 print('FINAL VALUE = ', valueForNode(0))
+print('relations: ', nodeRelations)
+# part2 - 93 is wrong
 
 # for line in f.readlines():
 # 	x = line[10:16].strip()
