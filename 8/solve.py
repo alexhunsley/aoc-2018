@@ -47,8 +47,6 @@ idx = 2
 opStack.append([0, 0, numChildren, numMetadata])
 print('stack initially = ', opStack)
 
-st = ''
-
 # map from child node ID to (parentNodeId, metadatas)
 nodeRelations = {}
 
@@ -66,8 +64,6 @@ while True:
 
 	(nodeId, currChild, numChildren, numMetadata) = opStack.pop()
 
-	if currChild == 0:
-		st += '[ [ '
 
 	currChild += 1
 
@@ -99,7 +95,6 @@ while True:
 		print('      PARENT NODE: ', parentNodeId)
 
 		metaDataStr = str(metaData)[1:-1]
-		st += ' ], %s], ' % metaDataStr
 
 		continue
 
@@ -132,29 +127,7 @@ print(' final metadata total = ', metaDataTotal)
 
 print()
 
-# cut off final ,
-st = st[:-2]
-print(st)
 
-structure = eval(st)
-print('structure = ', structure)
-
-
-def traverseTree(node, level):
-	children = node[0]
-	metadata = node[1:]
-
-	total = 0
-
-	if not children:
-		total = reduce(lambda x, y: x+y, metadata)
-	else:
-		for c in children:
-			total += traverseTree(c, level + 1)
-
-	return total
-
-print('total = ', traverseTree(structure, 0))
 
 print('relations: ', nodeRelations)
 # for line in f.readlines():
