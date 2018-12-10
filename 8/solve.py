@@ -4,7 +4,7 @@
 
 from collections import Counter, defaultdict
 from itertools import chain
-import pprint
+from pprint import pprint
 from copy import copy, deepcopy
 from itertools import repeat
 from functools import reduce
@@ -43,8 +43,14 @@ numMetadata = code[1]
 
 idx = 2
 
-opStack.append([0, numChildren, numMetadata])
+# node id, curr child being processed, num children, num metadata
+opStack.append([0, 0, numChildren, numMetadata])
 print('stack initially = ', opStack)
+
+st = ''
+
+# map from child node ID to (parentNodeId, metadatas)
+nodeRelations = {}
 
 cnt = 0
 while True:
@@ -58,14 +64,17 @@ while True:
 		print(' stack now empty! finished')
 		break
 
-	(currChild, numChildren, numMetadata) = opStack.pop()
+	(nodeId, currChild, numChildren, numMetadata) = opStack.pop()
+
+	if currChild == 0:
+		st += '[ [ '
 
 	currChild += 1
 
 	# put modified data back on stack (currChild has incremented)
-	opStack.append((currChild, numChildren, numMetadata))
+	opStack.append((nodeId, currChild, numChildren, numMetadata))
 
-	print(' stack not empty - doing childn %d of %d' % (currChild, numChildren))
+	print(' stack not empty - doing children %d of %d' % (currChild, numChildren))
 
 	# if no children left, node children finished processing - process metadata and continue
 	if currChild == numChildren + 1:
@@ -75,17 +84,32 @@ while True:
 		metaDataTotal += reduce(lambda x, y: x+y, metaData)
 
 		idx += numMetadata
-		print(' processed metadata %s, meta total: %d, stack idx now = %d ' % (metaData, metaDataTotal, idx))
+		print(' nodeID: %s processed metadata %s, meta total: %d, stack idx now = %d ' % (nodeId, metaData, metaDataTotal, idx))
 		opStack.pop()
+
+		# if >0 items on stack, we have a parent node, identify it
+		parentNodeId = -1
+		if len(opStack) > 0:
+			parentNodeId = opStack[-1][0]	
+
+		# relationValueData = [parentNodeId]
+
+		nodeRelations[nodeId] = [parentNodeId] + metaData
+
+		print('      PARENT NODE: ', parentNodeId)
+
+		metaDataStr = str(metaData)[1:-1]
+		st += ' ], %s], ' % metaDataStr
+
 		continue
 
 	print(' processing CHILD ', currChild)
 
 	numChildren = code[idx]
-	numMetadata = code[idx+1]
+	numMetadata = code[idx + 1]
 	idx += 2
 
-	opStack.append([0, numChildren, numMetadata])
+	opStack.append([nodeId + currChild, 0, numChildren, numMetadata])
 
 	# if numChildren == 0:
 	# 	print('no children, reading the metadata')
@@ -105,6 +129,34 @@ while True:
 
 print(opStack)
 print(' final metadata total = ', metaDataTotal)
+
+print()
+
+# cut off final ,
+st = st[:-2]
+print(st)
+
+structure = eval(st)
+print('structure = ', structure)
+
+
+def traverseTree(node, level):
+	children = node[0]
+	metadata = node[1:]
+
+	total = 0
+
+	if not children:
+		total = reduce(lambda x, y: x+y, metadata)
+	else:
+		for c in children:
+			total += traverseTree(c, level + 1)
+
+	return total
+
+print('total = ', traverseTree(structure, 0))
+
+print('relations: ', nodeRelations)
 # for line in f.readlines():
 # 	x = line[10:16].strip()
 # 	y = line[17:24].strip()
