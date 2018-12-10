@@ -63,9 +63,8 @@ while True:
 
 	print(' stack not empty - doing childn %d of %d' % (currChild, numChildren))
 
-	# are we finished with this node?
-	# if so (no children left), process metadata and continue
-	if numChildren == 0 or currChild == numChildren + 1:
+	# if no children left, node children finished processing - process metadata and continue
+	if currChild == numChildren + 1:
 		print('  .. reached end of (or no) children')
 		metaData = code[idx : idx + numMetadata]
 		print(' I saw metadata: ', metaData)
