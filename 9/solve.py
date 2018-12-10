@@ -4,11 +4,6 @@
 # Input:
 # 463 players; last marble is worth 71787 points
 
-#
-# puzzle notes:
-# "last marble is worth 1618 points" - they just mean it is marble 1618.
-# That marble is actually not worth anything, since it's not div by 23!
-
 from collections import defaultdict
 import sys
 from functools import reduce
@@ -38,16 +33,6 @@ def outputMarbles():
 	print("[%d] %s" % (nextElfToPlay + 1, str))
 
 outputMarbles()
-
-# print(indexOfMarbleWithClockwiseOffset(0, 1))
-# print(indexOfMarbleWithClockwiseOffset(0, 2))
-# print(indexOfMarbleWithClockwiseOffset(0, 3))
-
-# print('---------')
-# print(indexOfMarbleWithClockwiseOffset(0, -1))
-# print(indexOfMarbleWithClockwiseOffset(0, -2))
-# print(indexOfMarbleWithClockwiseOffset(0, -3))
-# print('---------')
 
 for i in range(0, 71787 + 1):
 	# print('i=', i)
