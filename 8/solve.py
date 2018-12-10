@@ -20,7 +20,7 @@ input = f.read()
 # input = "1 1 0 2 20 30 10"
 
 
-input = "2 1 0 2 20 30 0 4 1 2 3 4 10"
+input = "2 2 0 2 20 31 0 4 1 2 3 3 1 2"
 #        A---------------------------
 #            B-------- C----------
 
@@ -86,7 +86,7 @@ while True:
 		# if >0 items on stack, we have a parent node, identify it
 		parentNodeId = -1
 		if len(opStack) > 0:
-			parentNodeId = opStack[-1][0]	
+			parentNodeId = opStack[-1][0]
 
 		# relationValueData = [parentNodeId]
 
@@ -128,8 +128,41 @@ print(' final metadata total = ', metaDataTotal)
 print()
 
 
-
 print('relations: ', nodeRelations)
+
+def valueForNode(nodeId):
+	print('=== ENTER value for node ', nodeId)
+	# nodes pointing to this as parent should
+	# be in correct order if sorted by nodeId
+
+	# TODO - we don't need the full dict I think, just the id
+	childNodes = {k: v for k, v in nodeRelations.items() if nodeId == v[0]}
+	print('found child nodes ', childNodes)
+
+	metadata = nodeRelations[nodeId][1:]
+
+	if len(childNodes) == 0:
+		return reduce(lambda x, y: x+y, metadata)
+
+	# sum up the values of children referred to by metadata (where present)
+	childNodeIdsSorted = list(childNodes.keys())
+	childNodeIdsSorted.sort()
+
+	total = 0
+	childNodeIdsThatExist = [nodeId for nodeId in metadata if nodeId <= len(childNodes)]
+	for nodeId in childNodeIdsThatExist:
+		print('   ... calling sub childforNode... on id =', nodeId)
+		total += valueForNode(nodeId)
+
+	print('calc total = ', total)
+	print('childNodeIdsThatExist=', childNodeIdsThatExist)
+	print('child nodes of %s are %s' % (nodeId, childNodes))
+	print('child nodes sorted: ', childNodeIdsSorted)
+
+	return total
+
+print('FINAL VALUE = ', valueForNode(0))
+
 # for line in f.readlines():
 # 	x = line[10:16].strip()
 # 	y = line[17:24].strip()
