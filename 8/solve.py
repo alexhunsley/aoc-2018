@@ -19,8 +19,11 @@ input = f.read()
 # 1 child, 2 metadatas = 10, 11
 # input = "1 1 0 2 20 30 10"
 
-input = "2 1 0 2 20 30 0 4 1 2 3 4 10"
+
+# input = "2 1 0 2 20 30 0 4 1 2 3 4 10"
+#        ----------------------------
 #            --------- -----------
+
 code = input.split(' ')
 
 code = list(map(int, code))
@@ -42,9 +45,9 @@ print('stack initially = ', opStack)
 cnt = 0
 while True:
 	print('start loop, stack =', opStack)
-	cnt += 1
-	if cnt == 5:
-		break
+	# cnt += 1
+	# if cnt == 5:
+	# 	break
 
 	print('--------- start main loop, i = %d' % idx)
 	if not opStack:
