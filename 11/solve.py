@@ -33,7 +33,7 @@ def logPrint(str):
 # power = rackId + serialNumber
 # power *= rackId
 
-serialNumber = 18
+serialNumber = 9221
 
 gridWidth = 300
 gridHeight = 300
@@ -98,5 +98,7 @@ for y in range(1, gridHeight - 1):
 		if power > maxPower:
 			maxPower = power
 			tlX = x
-			tlY = y		
-print('max pow = %d, coords %d %d' % (maxPower, tlX, tlY))
+			tlY = y
+
+# print('max pow = %d, coords %d %d' % (maxPower, tlX, tlY))
+print(' Part 1: coord = %d, %d' % (tlX, tlY))
