@@ -14,6 +14,9 @@ f = open("input.txt")
 
 input = f.read()
 
+# ah! my node numbering is flawed!
+
+
 # 0 children, 1 metadata = 10
 # input = "0 1 10"
 
@@ -21,9 +24,14 @@ input = f.read()
 # input = "1 1 0 2 20 30 10"
 
 
-input = "2 2 0 2 20 31 0 4 1 2 3 3 1 2"
+# input = "2 1 0 2 20 31 0 4 1 2 3 3 1"
 #        A---------------------------
 #            B-------- C----------
+
+input = "2 1 1 2 0 1 99 20 31 0 4 1 2 3 1 98"
+#        A----------------------------------
+#            B--------------- D-------------
+#                C-----
 
 # Ah! can ref child nodes in metadata multiple times! this work? yes.
 
@@ -51,6 +59,10 @@ print('stack initially = ', opStack)
 # map from child node ID to (parentNodeId, metadatas)
 nodeRelations = {}
 
+spaces = " " * 200
+
+debugTree = ""
+
 cnt = 0
 while True:
 	print('start loop, stack =', opStack)
@@ -63,8 +75,14 @@ while True:
 		print(' stack now empty! finished')
 		break
 
+	numItemsOnStack = len(opStack)
+	spacer = spaces[0:numItemsOnStack * 2]
+
 	(nodeId, currChild, numChildren, numMetadata) = opStack.pop()
 
+	# debug tree
+	if currChild == 0:
+		debugTree += "%s >%s\n" % (spacer, nodeId)
 
 	currChild += 1
 
@@ -78,6 +96,9 @@ while True:
 		print('  .. reached end of (or no) children')
 		metaData = code[idx : idx + numMetadata]
 		print(' I saw metadata: ', metaData)
+
+		debugTree += "%s <%s  %s\n" % (spacer, nodeId, metaData)
+
 		metaDataTotal += reduce(lambda x, y: x+y, metaData)
 
 		idx += numMetadata
@@ -103,6 +124,7 @@ while True:
 	numMetadata = code[idx + 1]
 	idx += 2
 
+	# opStack.append([nodeId + currChild, 0, numChildren, numMetadata])
 	opStack.append([nodeId + currChild, 0, numChildren, numMetadata])
 
 	# if numChildren == 0:
@@ -162,6 +184,13 @@ def valueForNode(nodeId):
 
 print('FINAL VALUE = ', valueForNode(0))
 print('relations: ', nodeRelations)
+
+print()
+
+with open("tree.txt", "w") as treefile:
+    treefile.write(debugTree)
+
+
 # part2 - 93 is wrong
 
 # for line in f.readlines():
