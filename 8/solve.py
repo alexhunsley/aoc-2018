@@ -1,6 +1,10 @@
 # solve.py 8
 #
 
+# 
+# Exercise in masochism: I deliberately avoided recursion in the parsing.
+# Stack based parsing is a PITA, ugh :(
+
 
 from functools import reduce
 
