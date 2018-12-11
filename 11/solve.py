@@ -25,6 +25,7 @@ from itertools import repeat
 from functools import reduce
 import sys
 from operator import sub, add
+from tqdm import tqdm
 
 gridWidth = 300
 gridHeight = 300
@@ -39,8 +40,9 @@ def logPrint(str):
 # x, y are 1 based, as per the question
 #
 # returns a 'sumData': [sumList, x, y, squareSize]
-def makeSumList(x, y, squareSize, powerGrid):
+def makeSumData(x, y, squareSize, powerGrid):
 	# we want a list of sums, e.g. for squareSize = 3, we might have [3, 18, 9]
+	# TODO just call sum here! no need for reduce
 	sums = [reduce(lambda x, y: x+y, powerGrid[y - 1][x-1:x-1+squareSize]) for y in range(y, y + squareSize)]
 	return [sums, x, y, squareSize]
 
@@ -101,9 +103,9 @@ def testSumLists():
 	              [3,4,5],
 	              [6,7,8]]
 
-	print(makeSumList(1, 1, 2, sampleGrid) )
-	print(makeSumList(2, 1, 2, sampleGrid) )
-	print(makeSumList(1, 2, 2, sampleGrid) )
+	print(makeSumData(1, 1, 2, sampleGrid) )
+	print(makeSumData(2, 1, 2, sampleGrid) )
+	print(makeSumData(1, 2, 2, sampleGrid) )
 
 def testSumListsMove():
 	global gridWidth
@@ -116,9 +118,10 @@ def testSumListsMove():
 	              [4,5,6,7],
 	              [8,9,10,11],
 	              [12,13,14,15]]
-	#ORIG: 3, 5, 27
-	#new expected after right move: 6, 18, 30
-	s = makeSumList(1, 1, 3, sampleGrid4)
+
+	# s = makeSumData(1, 1, 1, sampleGrid4)
+	# s = makeSumData(1, 1, 2, sampleGrid4)
+	s = makeSumData(1, 1, 3, sampleGrid4)
 	print('starting sumlist = %s' % s)
 
 	moveRightSumlist = moveSumListRight(s, sampleGrid4)
@@ -153,7 +156,8 @@ def testSumListsMove():
 # power = rackId + serialNumber
 # power *= rackId
 
-serialNumber = 9221
+# serialNumber = 9221
+serialNumber = 18
 
 # gridWidth = 5
 # gridHeight = 5
@@ -183,23 +187,6 @@ for y in range(1, gridHeight + 1):
 		row.append(getPowerLevel(x, y, serialNumber))
 	cols.append(row)
 
-# print('done, data =%s', cols)
-# print('thart cioord = %d' % cols[1][3])
-# sys.exit(1)
-
-# up to here:
-# 5x5 is structured as:
-# [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14], [15, 16, 17, 18, 19], [20, 21, 22, 23, 24]]
-# i.e. data[y][x] is how you index it.
-
-# correct:
-# print('that square = %d' % cols[32][44])
-# print('that square = %d' % cols[32][45])
-# print('that square = %d' % cols[32][46])
-
-# print('that square = %d' % cols[33][44])
-# print('that square = %d' % cols[33][45])
-# print('that square = %d' % cols[33][46])
 
 def solvePart1():
 	powers = {}
@@ -222,5 +209,38 @@ def solvePart1():
 	# print('max pow = %d, coords %d %d' % (maxPower, tlX, tlY))
 	print(' Part 1: coord = %d, %d' % (tlX, tlY))
 
+def recordPowerTotal():
+	# nothing yet
+	pass
 
+
+def solvePart2():
+	maxPowerSumData = None
+	maxPower = None
+	# try large square for now
+	# for squareSize in tqmd(range(1, 300)): #301):
+	for squareSize in tqdm(range(10, 20)): #301):
+	# print('============================ squareSize: %d' % squareSize)
+		sumData = makeSumData(1, 1, squareSize, cols)
+
+		for y in range(1, gridHeight + 2 - squareSize):
+			workingSumData = deepcopy(sumData)
+			if y > 1:
+				workingSumData = moveSumListDown(workingSumData, cols)
+
+			for x in range(1, gridWidth + 2 - squareSize):
+				if x > 1:
+					workingSumData = moveSumListRight(workingSumData, cols)
+
+				sumList = workingSumData[0]
+				powerSum = sum(sumList)
+				# print('working on x, y = %d, %d, sumData = %s, total power = %d' % (x, y, sumData[1:], powerSum))
+				if maxPower == None or powerSum > maxPower:
+					maxPower = powerSum
+					# don't store the actual sumlist, skip that bit
+					maxPowerSumList = workingSumData[1:]
+	print(' Part 2: max power = %d, for %s' % (maxPower, maxPowerSumList))
+	#Part 2: max power = 21, for [270, 2, 4]
+	#270,2,4 is incorrect!
 solvePart1()
+solvePart2()
