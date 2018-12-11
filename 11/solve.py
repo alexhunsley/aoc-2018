@@ -16,7 +16,11 @@
 #
 # Before doing a right move, copy the horiz sum list so we can restore later.
 #
-
+# POSSIBLE OPTIMISATIONS:
+#
+# I call makeSumData for creating sumdata for each square size. Instead, we could just modify the previous sumData
+# to make square size n+1 each time (order n rather than n^2).
+#
 
 from collections import Counter, defaultdict
 from itertools import chain
