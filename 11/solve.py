@@ -217,9 +217,28 @@ def recordPowerTotal():
 def solvePart2():
 	maxPowerSumData = None
 	maxPower = None
+
+	print(cols[45][33:33+5])
+	print(cols[46][33:33+5])
+	print(cols[47][33:33+5])
+	print(cols[48][33:33+5])
+	print(cols[49][33:33+5])
+
+	print('======== blip')
+	print(cols[33][45:45+5])
+	print(cols[34][45:45+5])
+	print(cols[35][45:45+5])
+	print(cols[36][45:45+5])
+	print(cols[37][45:45+5])
+
+	# REMINDER: 44,32 CORRESPONDS to 33, 45 as stated in puzzle! off by 1, and y, x ordering.
+	print('zap: %d' % cols[44][32])
+	print('zap: %d' % cols[45][33])
+	print('zap: %d' % cols[46][34])
 	# try large square for now
 	# for squareSize in tqmd(range(1, 300)): #301):
-	for squareSize in tqdm(range(10, 20)): #301):
+
+	for squareSize in tqdm(range(1, 10)): #301):
 	# print('============================ squareSize: %d' % squareSize)
 		sumData = makeSumData(1, 1, squareSize, cols)
 
@@ -238,8 +257,14 @@ def solvePart2():
 				if maxPower == None or powerSum > maxPower:
 					maxPower = powerSum
 					# don't store the actual sumlist, skip that bit
-					maxPowerSumList = workingSumData[1:]
-	print(' Part 2: max power = %d, for %s' % (maxPower, maxPowerSumList))
+					maxPowerSumList = workingSumData
+
+	# don't forget to 
+	pt2x = maxPowerSumList[1] - 1
+	pt2y = maxPowerSumList[2] - 1
+	pt2squareSize = maxPowerSumList[3]
+	print(' Part 2: max power = %d, for %d,%d,%d' % (maxPower, pt2x, pt2y, pt2squareSize))
+
 	#Part 2: max power = 21, for [270, 2, 4]
 	#270,2,4 is incorrect!
 solvePart1()
