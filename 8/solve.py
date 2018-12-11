@@ -95,8 +95,6 @@ while True:
 
 		print('      PARENT NODE: ', parentNodeId)
 
-		metaDataStr = str(metaData)[1:-1]
-
 		continue
 
 	print(' processing CHILD ', currChild)
