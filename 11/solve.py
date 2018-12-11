@@ -121,14 +121,20 @@ def testSumListsMove():
 
 	# s = makeSumData(1, 1, 1, sampleGrid4)
 	# s = makeSumData(1, 1, 2, sampleGrid4)
-	s = makeSumData(1, 1, 3, sampleGrid4)
+	s = makeSumData(1, 1, 2, sampleGrid4)
 	print('starting sumlist = %s' % s)
 
 	moveRightSumlist = moveSumListRight(s, sampleGrid4)
 	print('move right sumlist = %s' % moveRightSumlist)
 
+	moveRightSumlist = moveSumListRight(moveRightSumlist, sampleGrid4)
+	print('2nd move right sumlist = %s' % moveRightSumlist)
+
 	moveDownSumlist = moveSumListDown(s, sampleGrid4)
 	print('move down sumlist = %s' % moveDownSumlist)
+
+	moveDownSumlist = moveSumListDown(moveDownSumlist, sampleGrid4)
+	print('2nd move down sumlist = %s' % moveDownSumlist)
 
 	sys.exit(1)
 
@@ -187,6 +193,38 @@ for y in range(1, gridHeight + 1):
 		row.append(getPowerLevel(x, y, serialNumber))
 	cols.append(row)
 
+# debug cols
+#checks out:
+# dbgX = 32
+# dbgY = 44
+
+# dbgX = 0
+# dbgY = 0
+# for y in range(dbgY, dbgY+6):
+# 	print('y:%d %s' % (y, cols[y][dbgX:dbgX+6]))
+
+# s = makeSumData(1, 1, 3, cols)
+# print('starting sumlist = %s' % s)
+
+# moveRightSumlist = moveSumListRight(s, cols)
+# print('move right sumlist = %s' % moveRightSumlist)
+
+# moveRightSumlist = moveSumListRight(moveRightSumlist, cols)
+# print('2nd move right sumlist = %s' % moveRightSumlist)
+
+# moveRightThenDownSumlist = moveSumListDown(moveRightSumlist, cols)
+# print('2nd move right then down sumlist = %s' % moveRightThenDownSumlist)
+
+# moveDownSumlist = moveSumListDown(s, cols)
+# print('move down sumlist = %s' % moveDownSumlist)
+
+# moveDownSumlist = moveSumListDown(moveDownSumlist, cols)
+# print('2nd move down sumlist = %s' % moveDownSumlist)
+
+# moveDownThenRightSumlist = moveSumListRight(moveDownSumlist, cols)
+# print('2nd move down then right sumlist = %s' % moveDownThenRightSumlist)
+
+# sys.exit(1)
 
 def solvePart1():
 	powers = {}
@@ -208,10 +246,6 @@ def solvePart1():
 
 	# print('max pow = %d, coords %d %d' % (maxPower, tlX, tlY))
 	print(' Part 1: coord = %d, %d' % (tlX, tlY))
-
-def recordPowerTotal():
-	# nothing yet
-	pass
 
 
 def solvePart2():
@@ -238,14 +272,15 @@ def solvePart2():
 	# try large square for now
 	# for squareSize in tqmd(range(1, 300)): #301):
 
-	for squareSize in tqdm(range(1, 10)): #301):
+	for squareSize in tqdm(range(3, 4)): #301):
 	# print('============================ squareSize: %d' % squareSize)
 		sumData = makeSumData(1, 1, squareSize, cols)
 
 		for y in range(1, gridHeight + 2 - squareSize):
-			workingSumData = deepcopy(sumData)
 			if y > 1:
-				workingSumData = moveSumListDown(workingSumData, cols)
+				sumData = moveSumListDown(sumData, cols)
+
+			workingSumData = deepcopy(sumData)
 
 			for x in range(1, gridWidth + 2 - squareSize):
 				if x > 1:
@@ -260,8 +295,8 @@ def solvePart2():
 					maxPowerSumList = workingSumData
 
 	# don't forget to 
-	pt2x = maxPowerSumList[1] - 1
-	pt2y = maxPowerSumList[2] - 1
+	pt2x = maxPowerSumList[1] #- 1
+	pt2y = maxPowerSumList[2] #- 1
 	pt2squareSize = maxPowerSumList[3]
 	print(' Part 2: max power = %d, for %d,%d,%d' % (maxPower, pt2x, pt2y, pt2squareSize))
 
