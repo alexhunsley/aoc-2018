@@ -17,10 +17,9 @@ def logPrint(str):
 		print(str, end='')
 
 # serialNumber = 9221
-serialNumber = 29
 
-x = 33
-y = 45
+# x = 33
+# y = 45
 
 # Find the fuel cell's rack ID, which is its X coordinate plus 10.
 # Begin with a power level of the rack ID times the Y coordinate.
@@ -34,8 +33,10 @@ y = 45
 # power = rackId + serialNumber
 # power *= rackId
 
-gridWidth = 30
-gridHeight = 30
+serialNumber = 9221
+
+gridWidth = 300
+gridHeight = 300
 
 def getPowerLevel(x, y, serialNumber):
 	rackId = (x + 10)
@@ -55,10 +56,37 @@ print(getPowerLevel(217, 196, 39))
 print(getPowerLevel(101, 153, 71))
 
 cols = []
-for y in range(1, gridHeight - 1):
+for y in range(1, gridHeight + 1):
 	row = []
-	for x in range(1, gridWidth - 1):
-		row.append(getPowerLevel(x, y, serialNumber))
+	for x in range(1, gridWidth + 1):
+		row.append(getPowerLevel(y, x, serialNumber))
 	cols.append(row)
 
-print('done, data =%s', cols)
+# print('done, data =%s', cols)
+
+# correct:
+print('that square = %d' % cols[32][44])
+print('that square = %d' % cols[32][45])
+print('that square = %d' % cols[32][46])
+
+print('that square = %d' % cols[33][44])
+print('that square = %d' % cols[33][45])
+print('that square = %d' % cols[33][46])
+
+powers = {}
+maxPower = -1
+tlX = -1
+tlY = -1
+# calc powers, naive way
+for y in range(1, gridHeight - 1):
+	for x in range(1, gridWidth - 1):
+		power = 0
+		for offsetX in range(0, 3):
+			for offsetY in range(0, 3):
+				# -1 for the 1 based stuff
+				power += cols[y - 1 + offsetY][x - 1 + offsetX]
+		if power > maxPower:
+			maxPower = power
+			tlX = x
+			tlY = y		
+print('max pow = %d, coords %d %d' % (maxPower, tlY, tlX))
