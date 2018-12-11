@@ -106,6 +106,11 @@ def testSumLists():
 	print(makeSumList(1, 2, 2, sampleGrid) )
 
 def testSumListsMove():
+	global gridWidth
+	global gridHeight
+
+	gridWidth = 4
+	gridHeight = 4
 	
 	sampleGrid4 = [[0,1,2,3],
 	              [4,5,6,7],
@@ -122,15 +127,13 @@ def testSumListsMove():
 	moveDownSumlist = moveSumListDown(s, sampleGrid4)
 	print('move down sumlist = %s' % moveDownSumlist)
 
+	sys.exit(1)
 
 # for testing
-gridWidth = 4
-gridHeight = 4
-testSumListsMove()
+# testSumListsMove()
 
 # testSumLists()
 
-sys.exit(1)
 # reduce(lambda x, y: x+y, metadata)
 
 # serialNumber = 9221
@@ -198,22 +201,26 @@ for y in range(1, gridHeight + 1):
 # print('that square = %d' % cols[33][45])
 # print('that square = %d' % cols[33][46])
 
-powers = {}
-maxPower = -1
-tlX = -1
-tlY = -1
-# calc powers, naive way
-for y in range(1, gridHeight - 1):
-	for x in range(1, gridWidth - 1):
-		power = 0
-		for offsetX in range(0, 3):
-			for offsetY in range(0, 3):
-				# -1 for the 1 based stuff!
-				power += cols[y - 1 + offsetY][x - 1 + offsetX]
-		if power > maxPower:
-			maxPower = power
-			tlX = x
-			tlY = y
+def solvePart1():
+	powers = {}
+	maxPower = -1
+	tlX = -1
+	tlY = -1
+	# calc powers, naive way
+	for y in range(1, gridHeight - 1):
+		for x in range(1, gridWidth - 1):
+			power = 0
+			for offsetX in range(0, 3):
+				for offsetY in range(0, 3):
+					# -1 for the 1 based stuff!
+					power += cols[y - 1 + offsetY][x - 1 + offsetX]
+			if power > maxPower:
+				maxPower = power
+				tlX = x
+				tlY = y
 
-# print('max pow = %d, coords %d %d' % (maxPower, tlX, tlY))
-print(' Part 1: coord = %d, %d' % (tlX, tlY))
+	# print('max pow = %d, coords %d %d' % (maxPower, tlX, tlY))
+	print(' Part 1: coord = %d, %d' % (tlX, tlY))
+
+
+solvePart1()
