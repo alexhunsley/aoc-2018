@@ -48,41 +48,39 @@ def makeSumList(x, y, squareSize, powerGrid):
 # gridDate is the power readings grid
 def moveSumListRight(sumData, gridData):
 	[sumList, x, y, squareSize] = sumData
-	print('got ', sumList, x, y, squareSize)
-	print('griddata = %s' % gridData)
+	# print('got ', sumList, x, y, squareSize)
+	# print('griddata = %s' % gridData)
 	newX = x + 1
-	print('new x = %d (%d)' % (newX, newX + squareSize - 1) )
+	# print('new x = %d (%d)' % (newX, newX + squareSize - 1) )
 	if (newX + squareSize - 1) > gridWidth:
 		print('moveSumListRight: Got given an x too large for grid for a right move! x = %d' % x)
 		sys.exit(1)
 
 	newColumn = newX + squareSize - 1
 
-	print('y range = %s' % range(y - 1, y - 1 + squareSize))
-	print('newColumn = %d' % newColumn)
-	print('gridY = %s' % gridData[y])
+	# print('y range = %s' % range(y - 1, y - 1 + squareSize))
+	# print('newColumn = %d' % newColumn)
+	# print('gridY = %s' % gridData[y])
 	# update sums
 	amountsToRemove = [gridData[yy][x - 1] for yy in range(y - 1, y - 1 + squareSize)]
-	print('amountsToRemove = %s' % amountsToRemove)
+	# print('amountsToRemove = %s' % amountsToRemove)
 	amountsToAdd = [gridData[yy][newColumn - 1] for yy in range(y - 1, y - 1 + squareSize)]
-	print('amountsToAdd = %s' % amountsToAdd)
+	# print('amountsToAdd = %s' % amountsToAdd)
 
 	sumList = map(sub, sumList, amountsToRemove)
 	sumList = list(map(add, sumList, amountsToAdd))
 	
-	print('new sumlist: %s' % sumList)
+	# print('new sumlist: %s' % sumList)
 
-	# if (y + squareSize - 1) > gridHeight:
-	# 	print('Got given an x too large for grid! y = %d' % y)
-	# 	sys.exit(1)
+	return [sumList, newX, y, squareSize]
 
 
 def moveSumListDown(sumData, gridData):
 	[sumList, x, y, squareSize] = sumData
-	print('got ', sumList, x, y, squareSize)
-	print('griddata = %s' % gridData)
+	# print('got ', sumList, x, y, squareSize)
+	# print('griddata = %s' % gridData)
 	newY = y + 1
-	print('new y = %d (%d)' % (newY, newY + squareSize - 1) )
+	# print('new y = %d (%d)' % (newY, newY + squareSize - 1) )
 	if (newY + squareSize - 1) > gridHeight:
 		print('moveSumListDown: Got given a y too large for grid for a down move! y = %d' % y)
 		sys.exit(1)
@@ -92,11 +90,12 @@ def moveSumListDown(sumData, gridData):
 
 	vals = gridData[y - 1 + squareSize][x-1:x-1+squareSize]
 	summy = reduce(lambda x, y: x+y, vals)
-	print('down move: vals, sum =%s, %s' % (vals, summy))
+	# print('down move: vals, sum =%s, %s' % (vals, summy))
 
 	sumList.append(summy)
-	print(' after move down, sumlist = %s' % sumList)
-	
+	# print(' after move down, sumlist = %s' % sumList)
+	return [sumList, x, newY, squareSize]
+
 def testSumLists():
 	sampleGrid = [[0,1,2],
 	              [3,4,5],
@@ -115,10 +114,14 @@ def testSumListsMove():
 	#ORIG: 3, 5, 27
 	#new expected after right move: 6, 18, 30
 	s = makeSumList(1, 1, 3, sampleGrid4)
-	print(s)
+	print('starting sumlist = %s' % s)
 
-	# moveSumListRight(s, sampleGrid4)
-	moveSumListDown(s, sampleGrid4)
+	moveRightSumlist = moveSumListRight(s, sampleGrid4)
+	print('move right sumlist = %s' % moveRightSumlist)
+
+	moveDownSumlist = moveSumListDown(s, sampleGrid4)
+	print('move down sumlist = %s' % moveDownSumlist)
+
 
 # for testing
 gridWidth = 4
