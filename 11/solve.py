@@ -33,7 +33,7 @@ from operator import sub, add
 from tqdm import tqdm
 
 serialNumber = 9221
-cols = []
+powerGrid = []
 
 gridWidth = 300
 gridHeight = 300
@@ -99,8 +99,9 @@ for y in range(1, gridHeight + 1):
 	row = []
 	for x in range(1, gridWidth + 1):
 		row.append(getPowerLevel(x, y, serialNumber))
-	cols.append(row)
+	powerGrid.append(row)
 
+# Part 1 is solved in a naive straightfoward manner
 def solvePart1():
 	powers = {}
 	maxPower = -1
@@ -112,7 +113,7 @@ def solvePart1():
 			power = 0
 			for offsetX in range(0, 3):
 				for offsetY in range(0, 3):
-					power += cols[y - 1 + offsetY][x - 1 + offsetX]
+					power += powerGrid[y - 1 + offsetY][x - 1 + offsetX]
 			if power > maxPower:
 				maxPower = power
 				tlX = x
@@ -120,23 +121,25 @@ def solvePart1():
 
 	print(' Part 1: coord = %d, %d' % (tlX, tlY))
 
-
+# Part 2 needs a different approach, as the part 1 approach would just take too long.
+# Although we could use scipy or numpy etc, I think part of the point is to solve
+# the optimisation issue yourself.
 def solvePart2():
 	maxPowerSumData = None
 	maxPower = None
 
 	for squareSize in tqdm(range(1, 301)):
-		sumData = makeSumData(1, 1, squareSize, cols)
+		sumData = makeSumData(1, 1, squareSize, powerGrid)
 
 		for y in range(1, gridHeight + 2 - squareSize):
 			if y > 1:
-				sumData = moveSumListDown(sumData, cols)
+				sumData = moveSumListDown(sumData, powerGrid)
 
 			workingSumData = deepcopy(sumData)
 
 			for x in range(1, gridWidth + 2 - squareSize):
 				if x > 1:
-					workingSumData = moveSumListRight(workingSumData, cols)
+					workingSumData = moveSumListRight(workingSumData, powerGrid)
 
 				sumList = workingSumData[0]
 				powerSum = sum(sumList)
