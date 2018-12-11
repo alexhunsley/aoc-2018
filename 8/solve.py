@@ -28,7 +28,7 @@ input = f.read()
 #        A---------------------------
 #            B-------- C----------
 
-input = "2 1 1 2 0 1 99 20 31 0 4 1 2 3 1 98"
+# input = "2 1 1 2 0 1 99 20 31 0 4 1 2 3 1 98"
 #        A----------------------------------
 #            B--------------- D-------------
 #                C-----
@@ -52,6 +52,7 @@ numMetadata = code[1]
 
 idx = 2
 
+
 # node id, curr child being processed, num children, num metadata
 opStack.append([0, 0, numChildren, numMetadata])
 print('stack initially = ', opStack)
@@ -64,11 +65,15 @@ spaces = " " * 200
 debugTree = ""
 
 cnt = 0
+
+nodeIdCounter = 0
+
 while True:
 	print('start loop, stack =', opStack)
 	# cnt += 1
 	# if cnt == 5:
 	# 	break
+
 
 	print('--------- start main loop, i = %d' % idx)
 	if not opStack:
@@ -125,7 +130,10 @@ while True:
 	idx += 2
 
 	# opStack.append([nodeId + currChild, 0, numChildren, numMetadata])
-	opStack.append([nodeId + currChild, 0, numChildren, numMetadata])
+
+	nodeIdCounter += 1
+
+	opStack.append([nodeIdCounter, 0, numChildren, numMetadata])
 
 	# if numChildren == 0:
 	# 	print('no children, reading the metadata')
@@ -161,6 +169,7 @@ def valueForNode(nodeId):
 	print('found child nodes ', childNodes)
 
 	metadata = nodeRelations[nodeId][1:]
+	print('for that node, relations=', nodeRelations[nodeId])
 
 	if len(childNodes) == 0:
 		return reduce(lambda x, y: x+y, metadata)
@@ -171,9 +180,14 @@ def valueForNode(nodeId):
 
 	total = 0
 	childNodeIdsThatExist = [nodeId for nodeId in metadata if nodeId <= len(childNodes)]
+	print('childNodeIdsThatExist = ', childNodeIdsThatExist)
 	for nodeId in childNodeIdsThatExist:
 		print('   ... calling sub childforNode... on id =', nodeId)
-		total += valueForNode(nodeId)
+		# total += valueForNode(nodeId)
+
+		nthChildKey = list(childNodes.keys())[nodeId - 1]
+		print('nth child key = ', nthChildKey)
+		total += valueForNode(nthChildKey)
 
 	print('calc total = ', total)
 	print('childNodeIdsThatExist=', childNodeIdsThatExist)
@@ -182,13 +196,15 @@ def valueForNode(nodeId):
 
 	return total
 
-print('FINAL VALUE = ', valueForNode(0))
-print('relations: ', nodeRelations)
-
-print()
-
 with open("tree.txt", "w") as treefile:
     treefile.write(debugTree)
+
+print('relations: ', nodeRelations)
+
+print('FINAL VALUE = ', valueForNode(0))
+
+# print()
+
 
 
 # part2 - 93 is wrong
