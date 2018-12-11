@@ -33,12 +33,15 @@ def logPrint(str):
 # power = rackId + serialNumber
 # power *= rackId
 
-serialNumber = 9221
+serialNumber = 18
 
 gridWidth = 300
 gridHeight = 300
+# gridWidth = 5
+# gridHeight = 5
 
 def getPowerLevel(x, y, serialNumber):
+	# return (y - 1) * gridWidth + x - 1	
 	rackId = (x + 10)
 	power = (rackId * y + serialNumber) * rackId
 
@@ -59,19 +62,26 @@ cols = []
 for y in range(1, gridHeight + 1):
 	row = []
 	for x in range(1, gridWidth + 1):
-		row.append(getPowerLevel(y, x, serialNumber))
+		row.append(getPowerLevel(x, y, serialNumber))
 	cols.append(row)
 
 # print('done, data =%s', cols)
+# print('thart cioord = %d' % cols[1][3])
+# sys.exit(1)
+
+# up to here:
+# 5x5 is structured as:
+# [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14], [15, 16, 17, 18, 19], [20, 21, 22, 23, 24]]
+# i.e. data[y][x] is how you index it.
 
 # correct:
-print('that square = %d' % cols[32][44])
-print('that square = %d' % cols[32][45])
-print('that square = %d' % cols[32][46])
+# print('that square = %d' % cols[32][44])
+# print('that square = %d' % cols[32][45])
+# print('that square = %d' % cols[32][46])
 
-print('that square = %d' % cols[33][44])
-print('that square = %d' % cols[33][45])
-print('that square = %d' % cols[33][46])
+# print('that square = %d' % cols[33][44])
+# print('that square = %d' % cols[33][45])
+# print('that square = %d' % cols[33][46])
 
 powers = {}
 maxPower = -1
@@ -89,4 +99,4 @@ for y in range(1, gridHeight - 1):
 			maxPower = power
 			tlX = x
 			tlY = y		
-print('max pow = %d, coords %d %d' % (maxPower, tlY, tlX))
+print('max pow = %d, coords %d %d' % (maxPower, tlX, tlY))
