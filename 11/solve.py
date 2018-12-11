@@ -272,7 +272,7 @@ def solvePart2():
 	# try large square for now
 	# for squareSize in tqmd(range(1, 300)): #301):
 
-	for squareSize in tqdm(range(3, 4)): #301):
+	for squareSize in tqdm(range(1, 301)):
 	# print('============================ squareSize: %d' % squareSize)
 		sumData = makeSumData(1, 1, squareSize, cols)
 
@@ -294,7 +294,6 @@ def solvePart2():
 					# don't store the actual sumlist, skip that bit
 					maxPowerSumList = workingSumData
 
-	# don't forget to 
 	pt2x = maxPowerSumList[1] #- 1
 	pt2y = maxPowerSumList[2] #- 1
 	pt2squareSize = maxPowerSumList[3]
