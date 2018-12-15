@@ -1,11 +1,9 @@
 # solve.py 13
 #
-# We are using 0 based coords internally.
-#
-# do carts always appear on straight sections in the input? I assume so.
+# Carts always appear on straight sections in the input.
 #
 # Observation: if we store all +, / and \ locations, we can disregard 
-# the straight section markers | and -. So more efficient sparse 
+# the straight section markers | and -. So can have more efficient sparse 
 # storage of where the former 3 items occur.
 #
 
@@ -20,7 +18,7 @@ from copy import deepcopy
 from types import SimpleNamespace
 
 # SimpleNamespace to represent a cart object:
-# pos, vel, behavIndex, id, 
+# pos, vel, behavIndex, id
 
 # inputFile = "debugEx1.txt"
 # inputFile = "debugEx2.txt"
@@ -29,13 +27,6 @@ from types import SimpleNamespace
 inputFile = "input.txt"
 # inputFile = "shortExample.txt"
 
-enableLog = True
-
-def logPrint(str):
-	if enableLog:
-		print(str)
-
-# lines = [x.strip() for x in f.readlines()]
 
 carts = []
 
@@ -52,20 +43,11 @@ crossingLocs = []
 slashLocs = []
 bslashLocs = []
 
-crossingDirections = [[]]
-
 def rotateVelLeft(v):
 	return [v[1], -v[0]]
 
 def rotateVelRight(v):
 	return [-v[1], v[0]]
-
-# test = [1, 0]
-# for i in range(0, 5):
-# 	print(test)
-# 	test = rotateVelRight(test)
-# 	# test = rotateVelLeft(test)
-# sys.exit(1)
 
 def adjustCartVelocityForCrossing(cartData):
 	if cartData.behavIndex == 0:
@@ -93,7 +75,6 @@ def adjustCartVelocityForBSlash(cartData):
 	else:
 		cartData.vel = rotateVelRight(cartData.vel)
 
-
 def readInput():
 	global mapSize
 	global lines
@@ -107,34 +88,29 @@ def readInput():
 	lineIndex = 0
 	cartIndex = 0
 	for l in lines:
-		# print("%s" % l, end='')
-
-		# find all occurence of cart chars
+		# find all occurence of cart chars to create carts
 		for (cartChar, startVel) in cartStartsToVelocities.items():
 			cartXPositions = [pos for pos, char in enumerate(l) if char == cartChar]
 			for cartXPos in cartXPositions:
-				# final 0 is the behaviour index (for + crossings)
-
-				#pos, vel, behav mode (0-2), processed, id
-				#'processed' is used during a processing scan, to avoid moving something twice
+				#'processed' property is used during a processing scan, to avoid moving something twice
 				c = SimpleNamespace(pos=[cartXPos, lineIndex], vel=startVel, behavIndex=0, processed=False, id=cartIndex)
 				carts.append(c)
 				cartIndex += 1
 
-		# read +
+		# read + items
 		crossingPositions = [pos for pos, char in enumerate(l) if char == '+']
 		for crossPos in crossingPositions:
 			# print('================= adding a cross oc: %s' % [crossPos, lineIndex])
 			crossingLocs.append([crossPos, lineIndex])
 
 
-		# read /
+		# read / items
 		slashPositions = [pos for pos, char in enumerate(l) if char == '/']
 		# print('=== read slash positions:', slashPositions)
 		for slashPos in slashPositions:
 			slashLocs.append([slashPos, lineIndex])
 
-		# read \
+		# read \ items
 		bslashPositions = [pos for pos, char in enumerate(l) if char == '\\']
 		# print('=== read bslash positions:', bslashPositions)
 		for bslashPos in bslashPositions:
@@ -147,7 +123,6 @@ def vecAdd(a, b):
 
 seenFirstCrash = False
 
-# returns True if collision
 def doTimestep():
 	global seenFirstCrash
 	global carts
@@ -158,21 +133,17 @@ def doTimestep():
 
 	global crossingLocs
 
-	# reset processing status for every cart
 	for c in carts:
 		c.processed = False
 
-
 	for lineNum in range(0, mapSize[1]):
 		cartsOnThisLine = [c for c in carts if not(c.processed) and c.pos[1] == lineNum]
-		# print('carts on this line:', cartsOnThisLine)
 
-		# sort ascending X
+		# sort carts on line by ascending X
 		cartsOnThisLine.sort(key=lambda g: g.pos[0])
 
 		while cartsOnThisLine:
 			c = cartsOnThisLine.pop(0)
-			# print('   single cart:', c)
 			c.processed = True
 
 			if c.pos in crossingLocs:
@@ -186,10 +157,7 @@ def doTimestep():
 				adjustCartVelocityForBSlash(c)
 
 			newLoc = list(vecAdd(c.pos, c.vel))
-			# print('new loc for %d is = %s' % (c.id, newLoc))
-			# print('>>> checking for coll: this = %s, all = ' % c)
-			# for p in carts:
-			# 	print(p)
+
 			collidedCarts = [b for b in carts if b.pos == newLoc]
 			if collidedCarts:
 				cCart = collidedCarts[0]
@@ -198,7 +166,6 @@ def doTimestep():
 					seenFirstCrash = True
 					print(' Part 1: first crash loc =', newLoc)
 
-				# print('coll cart: ', cCart)
 				carts.remove(cCart)
 				carts.remove(c)
 				
@@ -210,77 +177,36 @@ def doTimestep():
 					carts.remove(cCart)
 				if c in carts:
 					carts.remove(c)
-
-
-				# print('>>> AFTER REMOVE crashed ones: all = ')
-				# for p in carts:
-				# 	print(p)
 				
 			c.pos = newLoc
 
-	if stopAfterThisTick:
-		printMap()
-		print('DID FINAL TICK. final cart state is then = ', carts[0])
+	if len(carts) == 1:
+		print('DID FINAL TICK. final cart state is: ', carts[0])
 		sys.exit(1)
 
 	return None
 
-#part 2: 65,42 is wrong.
-#65,43 also.
-def solvePart1():
-	while (not doTimestep()):
-		pass
+def solvePart1and2():
+	loopIndex = 0
+	while (True):
+		loopIndex += 1
 
-readInput()
-print('after read input, # carts = ', len(carts))
-# print('after read input, cLocs= ', crossingLocs)
+		if loopIndex % 200 == 0:
+			print('loop: %d, num carts = %d' % (loopIndex, len(carts)))
 
-
-def mapStr():
-	s = ''
-	cartLocs = [ c.pos for c in carts ]
-
-	for y in range (0, mapSize[1]):
-		for x in range (0, mapSize[0]):
-			if [x, y] in cartLocs:
-				cartItem = [c for c in carts if c.pos == [x, y]][0]
-				# print('matched:', cartItem)
-				s += '%s' % cartItem[3]
-			else:
-				s += lines[y][x]
-		s += '\n'
-	return s
-
+		doTimestep()
 
 def printMap():
 	cartLocs = [ c.pos for c in carts ]
-
 	for y in range (0, mapSize[1]):
 		for x in range (0, mapSize[0]):
 			if [x, y] in cartLocs:
 				cartItem = [c for c in carts if c.pos == [x, y]][0]
-				# print('matched:', cartItem)
 				print('%s' % cartItem.id, end='')
 			else:
 				line = lines[y][x]
-				# line = lines[y][x].replace('|', ' ').replace('-', ' ')
 				print(line, end='')
 		print('')
-		# print('startLine:', end='')
 
-
-# doTimestep()
-# printMap()
-# sys.exit(1)
-
-loopIndex = 0
-while (True):
-	loopIndex += 1
-
-	if loopIndex % 200 == 0:
-		print('loop: %d, num carts = %d' % (loopIndex, len(carts)))
-
-	doTimestep()
-
-
-#44, 57 is not right.
+readInput()
+solvePart1and2()
