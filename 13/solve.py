@@ -137,12 +137,11 @@ def doTimestep():
 	newCartLocs = []
 
 	originalCartItemsDestroyedCoords = []
+
 	for lineNum in range(0, mapSize[1]):
 		# find all carts on this line, try to move them
-		# print('processing line ', lineNum)\
 
-		# don't processing carts that were crashed; so they disappear
-		cartsOnThisLine = [c for c in carts if c[0][1] == lineNum and c[0] not in originalCartItemsDestroyedCoords]
+		cartsOnThisLine = [c for c in carts if c[0][1] == lineNum]
 		# print('carts on this line: ', cartsOnThisLine)
 		for c in cartsOnThisLine:
 			# special char?
@@ -161,8 +160,9 @@ def doTimestep():
 			newLoc = [c[0][0] + c[1][0], c[0][1] + c[1][1]]
 			# print('check for loc %s in cart locs %s' % (newLoc, [cc[0] for cc in carts]))
 			# collision?
-			collidedCarts = [cart for cart in carts if cart[0] == newLoc]
+			collidedCarts = [c for c in carts if c[0] == newLoc]
 			if collidedCarts:
+				print(' collided 1')
 				# remove both cart, check how many left.
 				# the cart currently being moved just doesn't get added
 				# to newLocs. But we also need to remove the cart it crashed into:
@@ -174,6 +174,7 @@ def doTimestep():
 
 			collidedCarts = [ncart for ncart in newCartLocs if ncart[0] == newLoc]
 			if collidedCarts:
+				print(' collided 2')
 				# remove both cart, check how many left.
 				# the cart currently being moved just doesn't get added
 				# to newLocs. But we also need to remove the cart it crashed into.
@@ -184,6 +185,9 @@ def doTimestep():
 			newCartLocs.append([newLoc, c[1], c[2]])
 			# print('new cart locs, appended, got ', newCartLocs)
 	carts = newCartLocs
+
+	# remove carts previously destroyed
+	carts = [c for c in carts if not carts[0] in originalCartItemsDestroyedCoords]
 
 	if stopAfterThisTick:
 		printMap()
@@ -223,7 +227,7 @@ loopIndex = 0
 while (True):
 	loopIndex += 1
 	if loopIndex % 200 == 0:
-		print('loop: %d' % loopIndex)
+		print('loop: %d, num carts = %d' % (loopIndex, len(carts)))
 
 	# printMap()
 	collisionCoord = doTimestep()
