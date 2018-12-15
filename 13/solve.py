@@ -87,8 +87,8 @@ def readInput():
 	global mapSize
 	global lines
 
-	# f = open("input.txt")
-	f = open("shortExample.txt")
+	f = open("input.txt")
+	# f = open("shortExample.txt")
 
 	lines = f.readlines()
 	mapSize = (len(lines[0].rstrip("\r\n")), len(lines))
@@ -96,7 +96,7 @@ def readInput():
 
 	lineIndex = 0
 	for l in lines:
-		print("%s" % l, end='')
+		# print("%s" % l, end='')
 
 		# find all occurence of cart chars
 		for (cartChar, startVel) in cartStartsToVelocities.items():
@@ -108,19 +108,19 @@ def readInput():
 		# read +
 		crossingPositions = [pos for pos, char in enumerate(l) if char == '+']
 		for crossPos in crossingPositions:
-			print('================= adding a cross oc: %s' % [crossPos, lineIndex])
+			# print('================= adding a cross oc: %s' % [crossPos, lineIndex])
 			crossingLocs.append([crossPos, lineIndex])
 
 
 		# read /
 		slashPositions = [pos for pos, char in enumerate(l) if char == '/']
-		print('=== read slash positions:', slashPositions)
+		# print('=== read slash positions:', slashPositions)
 		for slashPos in slashPositions:
 			slashLocs.append([slashPos, lineIndex])
 
 		# read \
 		bslashPositions = [pos for pos, char in enumerate(l) if char == '\\']
-		print('=== read bslash positions:', bslashPositions)
+		# print('=== read bslash positions:', bslashPositions)
 		for bslashPos in bslashPositions:
 			bslashLocs.append([bslashPos, lineIndex])
 
@@ -133,25 +133,25 @@ def doTimestep():
 	newCartLocs = []
 	for lineNum in range(0, mapSize[1]):
 		# find all carts on this line, try to move them
-		print('processing line ', lineNum)
+		# print('processing line ', lineNum)
 		cartsOnThisLine = [c for c in carts if c[0][1] == lineNum]
-		print('carts on this line: ', cartsOnThisLine)
+		# print('carts on this line: ', cartsOnThisLine)
 		for c in cartsOnThisLine:
 			# special char?
-			print('c locs = %s' % crossingLocs)
+			# print('c locs = %s' % crossingLocs)
 			if c[0] in crossingLocs:
-				print(' processing a CROSS at %s' % c[0])
+				# print(' processing a CROSS at %s' % c[0])
 				adjustCartVelocityForCrossing(c)
 			if c[0] in slashLocs:
-				print(' processing a SLASH at %s' % c[0])
+				# print(' processing a SLASH at %s' % c[0])
 				adjustCartVelocityForSlash(c)
 			if c[0] in bslashLocs:
-				print(' processing a B-SLASH at %s' % c[0])
+				# print(' processing a B-SLASH at %s' % c[0])
 				adjustCartVelocityForBSlash(c)
 
 
 			newLoc = [c[0][0] + c[1][0], c[0][1] + c[1][1]]
-			print('check for loc %s in cart locs %s' % (newLoc, [cc[0] for cc in carts]))
+			# print('check for loc %s in cart locs %s' % (newLoc, [cc[0] for cc in carts]))
 			# collision?
 			collidedCarts = [cart for cart in carts if cart[0] == newLoc]
 			if collidedCarts:
@@ -168,8 +168,8 @@ def solvePart1():
 		pass
 
 readInput()
-print('after read input, carts = ', carts)
-print('after read input, cLocs= ', crossingLocs)
+# print('after read input, carts = ', carts)
+# print('after read input, cLocs= ', crossingLocs)
 
 def printMap():
 	cartLocs = [ c[0] for c in carts ]
@@ -183,23 +183,29 @@ def printMap():
 		print('')
 
 
-for i in range(0, 20):
-	printMap()
+# for i in range(0, 20):
+loopIndex = 0
+while (True):
+	loopIndex += 1
+	if loopIndex % 200 == 0:
+		print('loop: %d' % loopIndex)
+		
+	# printMap()
 	collisionCoord = doTimestep()
-	print('after timestep %d, carts = %s' % (i, carts))
+	# print('after timestep %d, carts = %s' % (i, carts))
 	if collisionCoord != None:
-		print(' Part 1: Collision at at %s (time = %s)' % (collisionCoord, i))
+		print(' Part 1: Collision at at %s (time = %s)' % (collisionCoord, loopIndex))
 		sys.exit(1)
-	print('----------------------------------------------------------')
+	# print('----------------------------------------------------------')
 
 # sys.exit(1)
 # solvePart1()
 
 
-print('\n====end')
-print("carts = %s" % carts)
-print("crossLocs = %s" % crossingLocs)
-print("slashLocs = %s" % slashLocs)
-print("bslashLocs = %s" % bslashLocs)
+# print('\n====end')
+# print("carts = %s" % carts)
+# print("crossLocs = %s" % crossingLocs)
+# print("slashLocs = %s" % slashLocs)
+# print("bslashLocs = %s" % bslashLocs)
 
 
