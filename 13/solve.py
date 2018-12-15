@@ -17,8 +17,12 @@ from itertools import repeat
 from functools import reduce
 import sys
 from copy import deepcopy
+from types import SimpleNamespace
 
-# inputFile = "debugEx1.txt"
+# SimpleNamespace to represent a cart object:
+# pos, vel, behavIndex, id, 
+
+# inputFile = "debugEx2.txt"
 # inputFile = "debugEx2.txt"
 # inputFile = "debugEx3.txt"
 inputFile = "input.txt"
@@ -62,31 +66,30 @@ def rotateVelRight(v):
 # sys.exit(1)
 
 def adjustCartVelocityForCrossing(cartData):
-	behav = cartData[2]
-	if behav == 0:
-		cartData[1] = rotateVelLeft(cartData[1])
-	elif behav == 1:
+	if cartData.behavIndex == 0:
+		cartData.vel = rotateVelLeft(cartData.vel)
+	elif cartData.behavIndex == 1:
 		# no change, keep on going straight ahead
 		pass
-	else:
-		cartData[1] = rotateVelRight(cartData[1])
+	else: # cartData.behavIndex == 3
+		cartData.vel = rotateVelRight(cartData.vel)
 	
 	# bump up behaviour flag (3 kinds of behaviour)
-	cartData[2] = (cartData[2] + 1) % 3
+	cartData.behavIndex = (cartData.behavIndex + 1) % 3
 
 def adjustCartVelocityForSlash(cartData):
 	# if moving vertically, a rotate right does it. Otherwise, rot left.
-	if cartData[1][1] != 0:
-		cartData[1] = rotateVelRight(cartData[1])
+	if cartData.vel[1] != 0:
+		cartData.vel = rotateVelRight(cartData.vel)
 	else:
-		cartData[1] = rotateVelLeft(cartData[1])
+		cartData.vel = rotateVelLeft(cartData.vel)
 
 
 def adjustCartVelocityForBSlash(cartData):
-	if cartData[1][1] != 0:
-		cartData[1] = rotateVelLeft(cartData[1])
+	if cartData.vel[1] != 0:
+		cartData.vel = rotateVelLeft(cartData.vel)
 	else:
-		cartData[1] = rotateVelRight(cartData[1])
+		cartData.vel = rotateVelRight(cartData.vel)
 
 
 def readInput():
@@ -110,8 +113,10 @@ def readInput():
 			for cartXPos in cartXPositions:
 				# final 0 is the behaviour index (for + crossings)
 
-				#pos, vel, behav mode (0-2), id
-				carts.append([[cartXPos, lineIndex], startVel, 0, cartIndex])
+				#pos, vel, behav mode (0-2), processed, id
+				#'processed' is used during a processing scan, to avoid moving something twice
+				c = SimpleNamespace(pos=[cartXPos, lineIndex], vel=startVel, behavIndex=0, processed=False, id=cartIndex)
+				carts.append(c)
 				cartIndex += 1
 
 		# read +
@@ -147,6 +152,9 @@ def doTimestep():
 	global crossingLocs
 	newCartLocs = []
 
+	for c in carts:
+		c.processed = False
+
 	if (len(oldCarts) != len(carts)):
 		print('timestep, old num carts, num carts = ', len(oldCarts), len(carts))
 		oldCarts = deepcopy(carts)
@@ -154,7 +162,7 @@ def doTimestep():
 	for lineNum in range(0, mapSize[1]):
 		# find all carts on this line, try to move them
 
-		cartsOnThisLine = [c for c in carts if c[0][1] == lineNum]
+		cartsOnThisLine = [c for c in carts if c.pos[1] == lineNum]
 		# print('carts on this line: ', cartsOnThisLine)
 
 		# for c in cartsOnThisLine:
@@ -165,50 +173,54 @@ def doTimestep():
 
 			# special char?
 			# print('c locs = %s' % crossingLocs)
-			if c[0] in crossingLocs:
+			if c.pos in crossingLocs:
 				# print(' processing a CROSS at %s' % c[0])
 				adjustCartVelocityForCrossing(c)
-			if c[0] in slashLocs:
+			if c.pos in slashLocs:
 				# print(' processing a SLASH at %s' % c[0])
 				adjustCartVelocityForSlash(c)
-			if c[0] in bslashLocs:
+			if c.pos in bslashLocs:
 				# print(' processing a B-SLASH at %s' % c[0])
 				adjustCartVelocityForBSlash(c)
 
-			originalLoc = c[0]
-			newLoc = [c[0][0] + c[1][0], c[0][1] + c[1][1]]
+			originalLoc = c.pos
+			newLoc = [c.pos[0] + c.vel[0], c.pos[1] + c.vel[1]]
 			# print('check for loc %s in cart locs %s' % (newLoc, [cc[0] for cc in carts]))
 		# collision?
 			# check for collision with item in newLocs
-			collidedCarts = [b for b in newCartLocs if b[0] == newLoc]
+			collidedCarts = [b for b in newCartLocs if b.pos == newLoc]
 			if collidedCarts:
 				print(' collided 2')
+				print(' collided 2 - loc = ', newLoc)
+				sys.exit(1)
 
 				print(']] 2 before coll: carts, newCarts = ', len(carts), len(newCartLocs))
-				newCartLocs = list(filter(lambda cc: cc[0] != newLoc, newCartLocs))
+				newCartLocs = list(filter(lambda cc: cc.pos != newLoc, newCartLocs))
 				print(']] 2 after coll: carts, newCarts = ', len(carts), len(newCartLocs))
 				cartSurvived = False
 
-			collidedCarts = [a for a in carts if a[0] == newLoc]
+			collidedCarts = [a for a in carts if a.pos == newLoc]
 			if collidedCarts:
-				print(' collided 1')
-
+				print(' collided 1 - loc = ', newLoc)
+				sys.exit(1)
 				# update pos then delete all carts with that pos
-				c[0] = newLoc
+				c.pos = newLoc
 
 				print(']] 1 before coll: carts = %s, %s' % (len(carts), carts))
-				carts = list(filter(lambda cc: cc[0] != newLoc, carts))
-				newCartLocs = list(filter(lambda cc: cc[0] != newLoc, newCartLocs))
+				carts = list(filter(lambda cc: cc.pos != newLoc, carts))
+				newCartLocs = list(filter(lambda cc: cc.pos != newLoc, newCartLocs))
 
 				# cartsOnThisLine = list(filter(lambda cc: cc[0] != originalLoc, cartsOnThisLine))
-				cartsOnThisLine = list(filter(lambda cc: cc[0] != newLoc, cartsOnThisLine))
+				cartsOnThisLine = list(filter(lambda cc: cc.pos != newLoc, cartsOnThisLine))
 
 				print(']] 1 after coll: carts = %s, %s' % (len(carts), carts))
 				cartSurvived = False
 
 			# print('survived =', cartSurvived)
 			if cartSurvived:
-				newCartLocs.append([newLoc, c[1], c[2], c[3]])
+				newCart = deepcopy(c)
+				newCart.pos = newLoc
+				newCartLocs.append(newCart)
 			# print('new cart locs, appended, got ', newCartLocs)
 
 	if len(newCartLocs) == 6:
@@ -225,11 +237,7 @@ def doTimestep():
 
 	if stopAfterThisTick:
 		printMap()
-		print('DID FINAL TICK. carts data item = ', carts)
-		ct = carts[0]
-		print('ONE CART LEFT! pos: ', ct)
-		print('ONE CART LEFT! pos after first solo tick:', (ct[0][0] + ct[1][0], ct[0][1] + ct[1][1]))
-		# print('ONE CART LEFT! pos after first solo tick: %s', (ct[0][0] + ct[2][0], ct[1][1] + ct[3][1]))
+		print('DID FINAL TICK. final cart state is then = ', carts[0])
 		sys.exit(1)
 
 	return None
@@ -247,12 +255,12 @@ print('after read input, # carts = ', len(carts))
 
 def mapStr():
 	s = ''
-	cartLocs = [ c[0] for c in carts ]
+	cartLocs = [ c.pos for c in carts ]
 
 	for y in range (0, mapSize[1]):
 		for x in range (0, mapSize[0]):
 			if [x, y] in cartLocs:
-				cartItem = [c for c in carts if c[0] == [x, y]][0]
+				cartItem = [c for c in carts if c.pos == [x, y]][0]
 				# print('matched:', cartItem)
 				s += '%s' % cartItem[3]
 			else:
@@ -262,15 +270,14 @@ def mapStr():
 
 
 def printMap():
-	cartLocs = [ c[0] for c in carts ]
-
+	cartLocs = [ c.pos for c in carts ]
 
 	for y in range (0, mapSize[1]):
 		for x in range (0, mapSize[0]):
 			if [x, y] in cartLocs:
-				cartItem = [c for c in carts if c[0] == [x, y]][0]
+				cartItem = [c for c in carts if c.pos == [x, y]][0]
 				# print('matched:', cartItem)
-				print('%s' % cartItem[3], end='')
+				print('%s' % cartItem.id, end='')
 			else:
 				line = lines[y][x].replace('|', ' ').replace('-', ' ')
 				print(line, end='')
