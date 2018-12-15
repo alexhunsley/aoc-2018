@@ -129,12 +129,20 @@ def readInput():
 # returns True if collision
 def doTimestep():
 	global carts
+	stopAfterThisTick = False
+	if len(carts) == 1:
+		stopAfterThisTick = True
+
 	global crossingLocs
 	newCartLocs = []
+
+	originalCartItemsDestroyedCoords = []
 	for lineNum in range(0, mapSize[1]):
 		# find all carts on this line, try to move them
-		# print('processing line ', lineNum)
-		cartsOnThisLine = [c for c in carts if c[0][1] == lineNum]
+		# print('processing line ', lineNum)\
+
+		# don't processing carts that were crashed; so they disappear
+		cartsOnThisLine = [c for c in carts if c[0][1] == lineNum and c[0] not in originalCartItemsDestroyedCoords]
 		# print('carts on this line: ', cartsOnThisLine)
 		for c in cartsOnThisLine:
 			# special char?
@@ -149,20 +157,47 @@ def doTimestep():
 				# print(' processing a B-SLASH at %s' % c[0])
 				adjustCartVelocityForBSlash(c)
 
-
+			originalLoc = c[0]
 			newLoc = [c[0][0] + c[1][0], c[0][1] + c[1][1]]
 			# print('check for loc %s in cart locs %s' % (newLoc, [cc[0] for cc in carts]))
 			# collision?
 			collidedCarts = [cart for cart in carts if cart[0] == newLoc]
 			if collidedCarts:
-				return newLoc
+				# remove both cart, check how many left.
+				# the cart currently being moved just doesn't get added
+				# to newLocs. But we also need to remove the cart it crashed into:
+				#
+				# so mark to remove newLoc item from carts (we're iterating over it currently
+				# so can't remove directly)
+				originalCartItemsDestroyedCoords.append(newLoc)
+				# return newLoc
+
 			collidedCarts = [ncart for ncart in newCartLocs if ncart[0] == newLoc]
 			if collidedCarts:
-				return newLoc
+				# remove both cart, check how many left.
+				# the cart currently being moved just doesn't get added
+				# to newLocs. But we also need to remove the cart it crashed into.
+				# We can remove cart directly from newLocs and we're not iterating over it
+				newCartLocs.remove(collidedCarts[0])
+
+				# return newLoc
 			newCartLocs.append([newLoc, c[1], c[2]])
+			# print('new cart locs, appended, got ', newCartLocs)
 	carts = newCartLocs
+
+	if stopAfterThisTick:
+		printMap()
+		print('DID FINAL TICK. carts data item = ', carts)
+		ct = carts[0]
+		print('ONE CART LEFT! pos: ', ct)
+		print('ONE CART LEFT! pos after first solo tick:', (ct[0][0] + ct[1][0], ct[0][1] + ct[1][1]))
+		# print('ONE CART LEFT! pos after first solo tick: %s', (ct[0][0] + ct[2][0], ct[1][1] + ct[3][1]))
+		sys.exit(1)
+
 	return None
 
+#part 2: 65,42 is wrong.
+#65,43 also.
 def solvePart1():
 	while (not doTimestep()):
 		pass
@@ -189,7 +224,7 @@ while (True):
 	loopIndex += 1
 	if loopIndex % 200 == 0:
 		print('loop: %d' % loopIndex)
-		
+
 	# printMap()
 	collisionCoord = doTimestep()
 	# print('after timestep %d, carts = %s' % (i, carts))
