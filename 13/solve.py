@@ -18,6 +18,11 @@ from functools import reduce
 import sys
 from copy import deepcopy
 
+# inputFile = "debugEx1.txt"
+# inputFile = "debugEx2.txt"
+# inputFile = "debugEx3.txt"
+inputFile = "input.txt"
+
 enableLog = True
 
 def logPrint(str):
@@ -88,14 +93,14 @@ def readInput():
 	global mapSize
 	global lines
 
-	f = open("input.txt")
-	# f = open("shortExample.txt")
+	f = open(inputFile)
 
 	lines = f.readlines()
 	mapSize = (len(lines[0].rstrip("\r\n")), len(lines))
 	print('map size =', mapSize)
 
 	lineIndex = 0
+	cartIndex = 0
 	for l in lines:
 		# print("%s" % l, end='')
 
@@ -104,7 +109,10 @@ def readInput():
 			cartXPositions = [pos for pos, char in enumerate(l) if char == cartChar]
 			for cartXPos in cartXPositions:
 				# final 0 is the behaviour index (for + crossings)
-				carts.append([[cartXPos, lineIndex], startVel, 0])
+
+				#pos, vel, behav mode (0-2), id
+				carts.append([[cartXPos, lineIndex], startVel, 0, cartIndex])
+				cartIndex += 1
 
 		# read +
 		crossingPositions = [pos for pos, char in enumerate(l) if char == '+']
@@ -148,7 +156,11 @@ def doTimestep():
 
 		cartsOnThisLine = [c for c in carts if c[0][1] == lineNum]
 		# print('carts on this line: ', cartsOnThisLine)
-		for c in cartsOnThisLine:
+
+		# for c in cartsOnThisLine:
+		while cartsOnThisLine:
+			c = cartsOnThisLine.pop(0)
+
 			cartSurvived = True
 
 			# special char?
@@ -176,24 +188,34 @@ def doTimestep():
 				newCartLocs = list(filter(lambda cc: cc[0] != newLoc, newCartLocs))
 				print(']] 2 after coll: carts, newCarts = ', len(carts), len(newCartLocs))
 				cartSurvived = False
-			else:
-				collidedCarts = [a for a in carts if a[0] == newLoc]
-				if collidedCarts:
-					print(' collided 1')
 
-					# update pos then delete all carts with that pos
-					c[0] = newLoc
+			collidedCarts = [a for a in carts if a[0] == newLoc]
+			if collidedCarts:
+				print(' collided 1')
 
-					print(']] 1 before coll: carts = ', len(carts))
-					carts = list(filter(lambda cc: cc[0] != newLoc, carts))
-					newCartLocs = list(filter(lambda cc: cc[0] != newLoc, newCartLocs))
-					print(']] 1 after coll: carts = ', len(carts))
-					cartSurvived = False
+				# update pos then delete all carts with that pos
+				c[0] = newLoc
+
+				print(']] 1 before coll: carts = %s, %s' % (len(carts), carts))
+				carts = list(filter(lambda cc: cc[0] != newLoc, carts))
+				newCartLocs = list(filter(lambda cc: cc[0] != newLoc, newCartLocs))
+
+				# cartsOnThisLine = list(filter(lambda cc: cc[0] != originalLoc, cartsOnThisLine))
+				cartsOnThisLine = list(filter(lambda cc: cc[0] != newLoc, cartsOnThisLine))
+
+				print(']] 1 after coll: carts = %s, %s' % (len(carts), carts))
+				cartSurvived = False
 
 			# print('survived =', cartSurvived)
 			if cartSurvived:
-				newCartLocs.append([newLoc, c[1], c[2]])
+				newCartLocs.append([newLoc, c[1], c[2], c[3]])
 			# print('new cart locs, appended, got ', newCartLocs)
+
+	if len(newCartLocs) == 6:
+		printMap()
+		print('final carts for 6 = ', carts)
+		print('final newcarts for 6 = ', newCartLocs)
+		sys.exit(1)
 
 	# if len(carts) != len(newCartLocs):
 	# 	print('cart count change: %d to %d' % (len(carts), len(newCartLocs)))
@@ -222,15 +244,36 @@ readInput()
 print('after read input, # carts = ', len(carts))
 # print('after read input, cLocs= ', crossingLocs)
 
-def printMap():
+
+def mapStr():
+	s = ''
 	cartLocs = [ c[0] for c in carts ]
 
 	for y in range (0, mapSize[1]):
 		for x in range (0, mapSize[0]):
 			if [x, y] in cartLocs:
-				print('*', end='')
+				cartItem = [c for c in carts if c[0] == [x, y]][0]
+				# print('matched:', cartItem)
+				s += '%s' % cartItem[3]
 			else:
-				print(lines[y][x], end='')
+				s += lines[y][x]
+		s += '\n'
+	return s
+
+
+def printMap():
+	cartLocs = [ c[0] for c in carts ]
+
+
+	for y in range (0, mapSize[1]):
+		for x in range (0, mapSize[0]):
+			if [x, y] in cartLocs:
+				cartItem = [c for c in carts if c[0] == [x, y]][0]
+				# print('matched:', cartItem)
+				print('%s' % cartItem[3], end='')
+			else:
+				line = lines[y][x].replace('|', ' ').replace('-', ' ')
+				print(line, end='')
 		print('')
 
 oldCarts = deepcopy(carts)
@@ -242,6 +285,7 @@ while (True):
 	if loopIndex % 200 == 0:
 		print('loop: %d, num carts = %d' % (loopIndex, len(carts)))
 
+	#herus
 	# printMap()
 	collisionCoord = doTimestep()
 	# print('after timestep %d, carts = %s' % (i, carts))
