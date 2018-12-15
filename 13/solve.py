@@ -16,6 +16,7 @@ from copy import copy, deepcopy
 from itertools import repeat
 from functools import reduce
 import sys
+from copy import deepcopy
 
 enableLog = True
 
@@ -126,9 +127,11 @@ def readInput():
 
 		lineIndex += 1
 
+
 # returns True if collision
 def doTimestep():
 	global carts
+	global oldCarts
 	stopAfterThisTick = False
 	if len(carts) == 1:
 		stopAfterThisTick = True
@@ -136,7 +139,9 @@ def doTimestep():
 	global crossingLocs
 	newCartLocs = []
 
-	originalCartItemsDestroyedCoords = []
+	if (len(oldCarts) != len(carts)):
+		print('timestep, old num carts, num carts = ', len(oldCarts), len(carts))
+		oldCarts = deepcopy(carts)
 
 	for lineNum in range(0, mapSize[1]):
 		# find all carts on this line, try to move them
@@ -144,6 +149,8 @@ def doTimestep():
 		cartsOnThisLine = [c for c in carts if c[0][1] == lineNum]
 		# print('carts on this line: ', cartsOnThisLine)
 		for c in cartsOnThisLine:
+			cartSurvived = True
+
 			# special char?
 			# print('c locs = %s' % crossingLocs)
 			if c[0] in crossingLocs:
@@ -159,35 +166,40 @@ def doTimestep():
 			originalLoc = c[0]
 			newLoc = [c[0][0] + c[1][0], c[0][1] + c[1][1]]
 			# print('check for loc %s in cart locs %s' % (newLoc, [cc[0] for cc in carts]))
-			# collision?
-			collidedCarts = [c for c in carts if c[0] == newLoc]
-			if collidedCarts:
-				print(' collided 1')
-				# remove both cart, check how many left.
-				# the cart currently being moved just doesn't get added
-				# to newLocs. But we also need to remove the cart it crashed into:
-				#
-				# so mark to remove newLoc item from carts (we're iterating over it currently
-				# so can't remove directly)
-				originalCartItemsDestroyedCoords.append(newLoc)
-				# return newLoc
-
-			collidedCarts = [ncart for ncart in newCartLocs if ncart[0] == newLoc]
+		# collision?
+			# check for collision with item in newLocs
+			collidedCarts = [b for b in newCartLocs if b[0] == newLoc]
 			if collidedCarts:
 				print(' collided 2')
-				# remove both cart, check how many left.
-				# the cart currently being moved just doesn't get added
-				# to newLocs. But we also need to remove the cart it crashed into.
-				# We can remove cart directly from newLocs and we're not iterating over it
-				newCartLocs.remove(collidedCarts[0])
 
-				# return newLoc
-			newCartLocs.append([newLoc, c[1], c[2]])
+				print(']] 2 before coll: carts, newCarts = ', len(carts), len(newCartLocs))
+				newCartLocs = list(filter(lambda cc: cc[0] != newLoc, newCartLocs))
+				print(']] 2 after coll: carts, newCarts = ', len(carts), len(newCartLocs))
+				cartSurvived = False
+			else:
+				collidedCarts = [a for a in carts if a[0] == newLoc]
+				if collidedCarts:
+					print(' collided 1')
+
+					# update pos then delete all carts with that pos
+					c[0] = newLoc
+
+					print(']] 1 before coll: carts = ', len(carts))
+					carts = list(filter(lambda cc: cc[0] != newLoc, carts))
+					newCartLocs = list(filter(lambda cc: cc[0] != newLoc, newCartLocs))
+					print(']] 1 after coll: carts = ', len(carts))
+					cartSurvived = False
+
+			# print('survived =', cartSurvived)
+			if cartSurvived:
+				newCartLocs.append([newLoc, c[1], c[2]])
 			# print('new cart locs, appended, got ', newCartLocs)
+
+	# if len(carts) != len(newCartLocs):
+	# 	print('cart count change: %d to %d' % (len(carts), len(newCartLocs)))
 	carts = newCartLocs
 
 	# remove carts previously destroyed
-	carts = [c for c in carts if not carts[0] in originalCartItemsDestroyedCoords]
 
 	if stopAfterThisTick:
 		printMap()
@@ -207,7 +219,7 @@ def solvePart1():
 		pass
 
 readInput()
-# print('after read input, carts = ', carts)
+print('after read input, # carts = ', len(carts))
 # print('after read input, cLocs= ', crossingLocs)
 
 def printMap():
@@ -221,6 +233,7 @@ def printMap():
 				print(lines[y][x], end='')
 		print('')
 
+oldCarts = deepcopy(carts)
 
 # for i in range(0, 20):
 loopIndex = 0
