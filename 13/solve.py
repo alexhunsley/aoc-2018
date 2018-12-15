@@ -165,14 +165,14 @@ def doTimestep():
 
 	for lineNum in range(0, mapSize[1]):
 		cartsOnThisLine = [c for c in carts if not(c.processed) and c.pos[1] == lineNum]
-		print('carts on this line:', cartsOnThisLine)
+		# print('carts on this line:', cartsOnThisLine)
 
 		# sort ascending X
 		cartsOnThisLine.sort(key=lambda g: g.pos[0])
 
 		while cartsOnThisLine:
 			c = cartsOnThisLine.pop(0)
-			print('   single cart:', c)
+			# print('   single cart:', c)
 			c.processed = True
 
 			if c.pos in crossingLocs:
@@ -186,10 +186,10 @@ def doTimestep():
 				adjustCartVelocityForBSlash(c)
 
 			newLoc = list(vecAdd(c.pos, c.vel))
-			print('new loc for %d is = %s' % (c.id, newLoc))
-			print('>>> checking for coll: this = %s, all = ' % c)
-			for p in carts:
-				print(p)
+			# print('new loc for %d is = %s' % (c.id, newLoc))
+			# print('>>> checking for coll: this = %s, all = ' % c)
+			# for p in carts:
+			# 	print(p)
 			collidedCarts = [b for b in carts if b.pos == newLoc]
 			if collidedCarts:
 				cCart = collidedCarts[0]
@@ -198,7 +198,7 @@ def doTimestep():
 					seenFirstCrash = True
 					print(' Part 1: first crash loc =', newLoc)
 
-				print('coll cart: ', cCart)
+				# print('coll cart: ', cCart)
 				carts.remove(cCart)
 				carts.remove(c)
 				
@@ -212,9 +212,9 @@ def doTimestep():
 					carts.remove(c)
 
 
-				print('>>> AFTER REMOVE crashed ones: all = ')
-				for p in carts:
-					print(p)
+				# print('>>> AFTER REMOVE crashed ones: all = ')
+				# for p in carts:
+				# 	print(p)
 				
 			c.pos = newLoc
 
@@ -272,35 +272,15 @@ def printMap():
 # doTimestep()
 # printMap()
 # sys.exit(1)
-# oldCarts = deepcopy(carts)
 
-# for i in range(0, 20):
 loopIndex = 0
 while (True):
 	loopIndex += 1
-	# if loopIndex == 10:
-	# 	sys.exit(1)
 
 	if loopIndex % 200 == 0:
 		print('loop: %d, num carts = %d' % (loopIndex, len(carts)))
 
 	doTimestep()
-	# printMap()
-
-	# print('after timestep %d, carts = %s' % (i, carts))
-	# if collisionCoord != None:
-	# 	print(' Part 1: Collision at at %s (time = %s)' % (collisionCoord, loopIndex))
-	# 	sys.exit(1)
-	# print('----------------------------------------------------------')
-
-# sys.exit(1)
-# solvePart1()
 
 
-# print('\n====end')
-# print("carts = %s" % carts)
-# print("crossLocs = %s" % crossingLocs)
-# print("slashLocs = %s" % slashLocs)
-# print("bslashLocs = %s" % bslashLocs)
-
-
+#44, 57 is not right.
