@@ -168,19 +168,21 @@ def doTimestep():
 				carts.remove(cCart)
 				carts.remove(c)
 				
-				if cCart in cartsOnThisLine:
-					cartsOnThisLine.remove(cCart)
-				if c in cartsOnThisLine:
-					cartsOnThisLine.remove(c)
+				# we must remove destroyed carts from both the carts masterlist
+				# and from the list of carts on current line
 				if cCart in carts:
 					carts.remove(cCart)
 				if c in carts:
 					carts.remove(c)
+				if cCart in cartsOnThisLine:
+					cartsOnThisLine.remove(cCart)
+				if c in cartsOnThisLine:
+					cartsOnThisLine.remove(c)
 				
 			c.pos = newLoc
 
 	if len(carts) == 1:
-		print('DID FINAL TICK. final cart state is: ', carts[0])
+		print(' Part 2: %s (final cart state is: %s) ' % (carts[0].pos, carts[0]))
 		return True
 
 	return False
