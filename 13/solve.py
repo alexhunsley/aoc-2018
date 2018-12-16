@@ -7,15 +7,16 @@
 # storage of where the former 3 items occur.
 #
 
-from collections import Counter, defaultdict
-from itertools import chain
-import pprint
-from copy import copy, deepcopy
-from itertools import repeat
-from functools import reduce
 import sys
 from copy import deepcopy
 from types import SimpleNamespace
+from enum import IntEnum
+
+class CrossingBehaviour(IntEnum):
+			TURNLEFT = 0
+			STRAIGHTON = 1
+			TURNRIGHT = 2
+
 
 # SimpleNamespace to represent a cart object:
 # pos, vel, behavIndex, id
@@ -50,12 +51,12 @@ def rotateVelRight(v):
 	return [-v[1], v[0]]
 
 def adjustCartVelocityForCrossing(cartData):
-	if cartData.behavIndex == 0:
+	if cartData.behavIndex == CrossingBehaviour.TURNLEFT:
 		cartData.vel = rotateVelLeft(cartData.vel)
-	elif cartData.behavIndex == 1:
+	elif cartData.behavIndex == CrossingBehaviour.STRAIGHTON:
 		# no change, keep on going straight ahead
 		pass
-	else: # cartData.behavIndex == 3
+	else: # cartData.behavIndex == CrossingBehaviour.TURNRIGHT
 		cartData.vel = rotateVelRight(cartData.vel)
 	
 	# bump up behaviour flag (3 kinds of behaviour)
@@ -85,15 +86,14 @@ def readInput():
 	mapSize = (len(lines[0].rstrip("\r\n")), len(lines))
 	print('map size =', mapSize)
 
-	lineIndex = 0
 	cartIndex = 0
-	for l in lines:
+	for lineIndex, l in enumerate(lines):
 		# find all occurence of cart chars to create carts
 		for (cartChar, startVel) in cartStartsToVelocities.items():
 			cartXPositions = [pos for pos, char in enumerate(l) if char == cartChar]
 			for cartXPos in cartXPositions:
 				#'processed' property is used during a processing scan, to avoid moving something twice
-				c = SimpleNamespace(pos=[cartXPos, lineIndex], vel=startVel, behavIndex=0, processed=False, id=cartIndex)
+				c = SimpleNamespace(pos=[cartXPos, lineIndex], vel=startVel, behavIndex=CrossingBehaviour.TURNLEFT, processed=False, id=cartIndex)
 				carts.append(c)
 				cartIndex += 1
 
@@ -115,8 +115,6 @@ def readInput():
 		# print('=== read bslash positions:', bslashPositions)
 		for bslashPos in bslashPositions:
 			bslashLocs.append([bslashPos, lineIndex])
-
-		lineIndex += 1
 
 def vecAdd(a, b):
 	return map(sum, zip(a,b))
