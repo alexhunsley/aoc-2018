@@ -16,8 +16,8 @@ def logPrint(str):
 	if enableLog:
 		print(str, end='')
 
-# f = open("input.txt")
-f = open("testShortestDistInput.txt")
+f = open("input.txt")
+# f = open("testShortestDistInput.txt")
 
 mobs = []
 mobChars = ['E', 'G']
@@ -104,7 +104,8 @@ def calcShortestDist(a, distAccum):
 		if lines[ c[1] ][ c[0] ] == '.':
 			calcShortestDist((c[0], c[1]), distAccum + 1)
 
-calcShortestDist((8, 3), 0)
+# calcShortestDist((8, 3), 0)
+calcShortestDist((12, 13), 0)
 
 print('dists: ', shortestDistMap)
 
