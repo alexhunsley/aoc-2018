@@ -56,7 +56,7 @@ def adjustCartVelocityForCrossing(cartData):
 	elif cartData.behavIndex == CrossingBehaviour.STRAIGHTON:
 		# no change, keep on going straight ahead
 		pass
-	else: # cartData.behavIndex == CrossingBehaviour.TURNRIGHT
+	else: # cartData.behavIndex == CrossingBehaviour.TURNRIGHT
 		cartData.vel = rotateVelRight(cartData.vel)
 	
 	# bump up behaviour flag (3 kinds of behaviour)
@@ -121,6 +121,7 @@ def vecAdd(a, b):
 
 seenFirstCrash = False
 
+# returns False if final timestep has happened (i.e. 1 cart left)
 def doTimestep():
 	global seenFirstCrash
 	global carts
@@ -180,19 +181,17 @@ def doTimestep():
 
 	if len(carts) == 1:
 		print('DID FINAL TICK. final cart state is: ', carts[0])
-		sys.exit(1)
+		return True
 
-	return None
+	return False
 
 def solvePart1and2():
 	loopIndex = 0
-	while (True):
+	while not doTimestep():
 		loopIndex += 1
 
 		if loopIndex % 200 == 0:
 			print('loop: %d, num carts = %d' % (loopIndex, len(carts)))
-
-		doTimestep()
 
 def printMap():
 	cartLocs = [ c.pos for c in carts ]
