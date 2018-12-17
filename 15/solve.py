@@ -84,15 +84,33 @@ def sortedMobs():
 printMap()
 # print('mobs = ', mobs)
 
-print('sroted mobs =', sortedMobs())
+print('sorted mobs =', sortedMobs())
 
 shortestDistMap = {}
+distancesCache = {}
+
 # calcShortestDist([9, 4], [7, 7], 0)
 
 neighbourCells = [[-1, 0], [1, 0], [0, -1], [0, 1]]
 
+def distBetweenSquares(a, b):
+	dists = calcShortestDistWithCache(a)
+	print(' cache, got dists = ', dists)
+	return dists[b]
+
+def calcShortestDistWithCache(a):
+	if a in distancesCache:
+		print('cache hit!')
+		return distancesCache[a]
+
+	print('cache miss!')
+	dists = calcShortestDist(a, 0)
+	print('... so I calcd these dists:', dists)
+	distancesCache[a] = dists
+	return dists
+
 def calcShortestDist(a, distAccum):
-	print('calc shortest dist: a = ', a, ' accum = ', distAccum)
+	# print('calc shortest dist: a = ', a, ' accum = ', distAccum)
 	if (not a in shortestDistMap or shortestDistMap[a] > distAccum):
 		shortestDistMap[a] = distAccum
 	else:
@@ -100,19 +118,25 @@ def calcShortestDist(a, distAccum):
 
 	for cell in neighbourCells:
 		c = [a[0] + cell[0], a[1] + cell[1]]
-		print('calc c=', c)
+		# print('calc c=', c)
 		if lines[ c[1] ][ c[0] ] == '.':
 			calcShortestDist((c[0], c[1]), distAccum + 1)
 
 # calcShortestDist((8, 3), 0)
 calcShortestDist((12, 13), 0)
+# for y in range(10, 13):
+# 	for i in range(0, 4):
+# 		calcShortestDistWithCache((12, y))
 
-print('dists: ', shortestDistMap)
+# print('dists: ', shortestDistMap)
 
 printMapWithDists()
 # 	x = line[10:16].strip()
 # 	y = line[17:24].strip()
 	
 # 	print("!%s,%s!" % (x, y))
+
+
+# print('dists test: ', distBetweenSquares((19, 23), (20, 23)))
 
 
